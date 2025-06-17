@@ -26,9 +26,10 @@ endif()
 
 add_executable(URViewer src/main.cpp)
 target_include_directories(URViewer
-  PRIVATE src
+    PRIVATE src
+    "$ENV{HOME}/.local/src/raygui/src"
 )
 
 target_link_libraries(URViewer
-  PRIVATE raylib 
+    PRIVATE raylib 
 )

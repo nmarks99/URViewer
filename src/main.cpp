@@ -1,88 +1,137 @@
 #include "raylib.h"
 #include "raymath.h"
 
-struct Entity {
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 
-    Entity(Model model) : model(model) {}
-    Entity(Model model, Vector3 position) : model(model), position(position) {}
-    Entity(Model model, Vector3 position, Color color) : model(model), position(position), color(color) {}
-    
+void draw_world_axes();
+
+struct Link {
     Model model;
-    Vector3 position = {0.0, 0.0, 0.0};
-    float scale = 1.0;
-    Color color = WHITE;
 
-    void draw() {
-        DrawModel(model, position, scale, color);
-    }
+    Link(const char *model_path);
+    ~Link();
 
-    void draw_coord_axes() {
-        const float axis_thickness = 0.005;
-        Vector3 xvec{0.1, 0.0, 0.0};
-        Vector3 yvec{0.0, 0.1, 0.0};
-        Vector3 zvec{0.0, 0.0, 0.1};
-        DrawCylinderEx(position, Vector3Add(position, xvec), axis_thickness, axis_thickness, 20, RED);
-        DrawCylinderEx(position, Vector3Add(position, yvec), axis_thickness, axis_thickness, 20, GREEN);
-        DrawCylinderEx(position, Vector3Add(position, zvec), axis_thickness, axis_thickness, 20, BLUE);
+    void draw();
+    void draw_axes();
+};
+
+struct Window {
+    Window(int width, int height, const char *title) {
+        InitWindow(width, height, title);
+    };
+
+    ~Window() {
+        TraceLog(LOG_INFO, "Closing window\n");
+        CloseWindow();
     }
 };
 
-int main(void) {
-    const int screenWidth = 1000;
-    const int screenHeight = 800;
 
-    InitWindow(screenWidth, screenHeight, "UR Robot Viewer");
+int main(void) {
+
+    SetTraceLogLevel(LOG_FATAL);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    Window window(1000, 1000, "UR Robot Viewer");
 
     // Define the camera to look into our 3d world
     Camera camera = {0};
-    camera.position = (Vector3){1.0f, 1.0f, 1.0f}; // Camera position
-    camera.target = (Vector3){0.0f, 0.0f, 0.0f};   // Camera looking at point
-    camera.up = (Vector3){0.0f, 1.0f, 0.0f};       // Camera up vector (rotation towards target)
-    camera.fovy = 45.0f;                           // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;        // Camera mode type
+    camera.position = Vector3{1.0f, 1.0f, 1.0f}; // Camera position
+    camera.target = Vector3{0.0f, 0.0f, 0.0f};   // Camera looking at point
+    camera.up = Vector3{0.0f, 1.0f, 0.0f};       // Camera up vector (rotation towards target)
+    camera.fovy = 45.0f;                         // Camera field-of-view Y
+    camera.projection = CAMERA_PERSPECTIVE;      // Camera mode type
 
-    Model base_model = LoadModel("models/Base_UR3_G5_12.gltf");
-    Entity base = Entity(base_model, {0.0, 0.0, 0.25});
+    // Load models
+    Link base("models/Base_UR3_G5_12.gltf");
+    base.model.transform = MatrixMultiply(MatrixIdentity(), MatrixTranslate(0.25, 0.0, 0.0));
 
-    Model link1_model = LoadModel("models/Link1_UR3_G5.gltf");
-    Entity link1 = Entity(link1_model, {0.0, 0.0, -0.25});
-    
-    Model link2_model = LoadModel("models/Link2_UR3_G5_2.gltf");
-    Entity link2 = Entity(link2_model, {0.0, 0.0, 0.0});
+    Link link1("models/Link1_UR3_G5.gltf");
+    link1.model.transform = MatrixMultiply(MatrixIdentity(), MatrixRotateY(0.7));
+    link1.model.transform = MatrixMultiply(link1.model.transform, MatrixTranslate(-0.25, 0.0, 0.0));
 
-    SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+    Link link2("models/Link2_UR3_G5_2.gltf");
+    link2.model.transform = MatrixMultiply(MatrixIdentity(), MatrixRotateY(-0.7));
+    link2.model.transform = MatrixMultiply(link2.model.transform, MatrixTranslate(0.25, 0.25, 0.0));
 
-    // Main game loop
+    // TODO: extract this from link2.model.transform
+    Matrix link2_trans = MatrixTranslate(0.25, 0.25, 0.0);
+
+    float link2_angle_y = 0.0;
+
+    SetTargetFPS(60);
+
     while (!WindowShouldClose()) {
         if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) {
             UpdateCamera(&camera, CAMERA_THIRD_PERSON);
         }
 
+        link2.model.transform = MatrixMultiply(MatrixRotateY(link2_angle_y), link2_trans);
+
+        // DRAW /////////////////////////////////
         BeginDrawing();
-            ClearBackground(RAYWHITE);
+        ClearBackground(RAYWHITE);
 
-            BeginMode3D(camera);
+        GuiSlider((Rectangle){ 96, 48, 216, 16 }, TextFormat("%0.2f", link2_angle_y), NULL, &link2_angle_y, -2*3.14f, 2*3.14f);
 
-                base.draw();
-                base.draw_coord_axes();
-                link1.draw();
-                link1.draw_coord_axes();
-                // link2.draw();
-                link2.draw_coord_axes();
-                DrawModelEx(link2.model, link2.position, {0.0, 0.0, 1.0}, -90.0, {1,1,1}, WHITE);
+        // 3D -------------
+        BeginMode3D(camera);
 
-                DrawGrid(20, 0.25f); // Draw a grid
+        base.draw();
+        base.draw_axes();
 
-            EndMode3D();
+        link1.draw();
+        link1.draw_axes();
 
-            DrawFPS(10, 10);
+        link2.draw();
+        link2.draw_axes();
+
+        draw_world_axes();
+        DrawGrid(20, 0.25f);
+
+        EndMode3D();
+        // 3D -------------
+
         EndDrawing();
+        // DRAW /////////////////////////////////
     }
 
-    UnloadModel(base_model);
-    UnloadModel(link1_model);
-    UnloadModel(link2_model);
-    CloseWindow();
-
     return 0;
+}
+
+void draw_world_axes() {
+    const float thickness = 0.005;
+    const Vector3 xvec{0.1, 0.0, 0.0};
+    const Vector3 yvec{0.0, 0.1, 0.0};
+    const Vector3 zvec{0.0, 0.0, 0.1};
+    const Vector3 position{0.0, 0.0, 0.0};
+    const int sides = 20;
+    DrawCylinderEx(position, Vector3Add(position, xvec), thickness, thickness, sides, RED);
+    DrawCylinderEx(position, Vector3Add(position, yvec), thickness, thickness, sides, GREEN);
+    DrawCylinderEx(position, Vector3Add(position, zvec), thickness, thickness, sides, BLUE);
+}
+
+Link::Link(const char *model_path) : model(LoadModel(model_path)) {}
+
+Link::~Link() {
+    if (model.meshCount > 0) {
+        TraceLog(LOG_INFO, "Unloading model\n");
+        UnloadModel(model);
+    }
+}
+
+void Link::draw() {
+    DrawModel(model, Vector3Zeros, 1.0, WHITE);
+}
+
+void Link::draw_axes() {
+    const float thickness = 0.005;
+    const int sides = 20;
+    auto position = Vector3Transform(Vector3Zeros, model.transform);
+    auto x_rot_vec = Vector3Transform({0.1,0.0,0.0}, model.transform);
+    auto y_rot_vec = Vector3Transform({0.0,0.1,0.0}, model.transform);
+    auto z_rot_vec = Vector3Transform({0.0,0.0,0.1}, model.transform);
+    DrawCylinderEx(position, x_rot_vec, thickness, thickness, sides, RED);
+    DrawCylinderEx(position, y_rot_vec, thickness, thickness, sides, GREEN);
+    DrawCylinderEx(position, z_rot_vec, thickness, thickness, sides, BLUE);
 }
