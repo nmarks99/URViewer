@@ -5,6 +5,7 @@
 #include "raygui.h"
 
 void draw_world_axes();
+Vector3 extract_translation(const Matrix &m);
 
 struct Link {
     Model model;
@@ -32,7 +33,7 @@ int main(void) {
 
     SetTraceLogLevel(LOG_FATAL);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    Window window(1000, 1000, "UR Robot Viewer");
+    Window window(800, 800, "UR Robot Viewer");
 
     // Define the camera to look into our 3d world
     Camera camera = {0};
@@ -54,8 +55,9 @@ int main(void) {
     link2.model.transform = MatrixMultiply(MatrixIdentity(), MatrixRotateY(-0.7));
     link2.model.transform = MatrixMultiply(link2.model.transform, MatrixTranslate(0.25, 0.25, 0.0));
 
-    // TODO: extract this from link2.model.transform
-    Matrix link2_trans = MatrixTranslate(0.25, 0.25, 0.0);
+    Vector3 link2_trans_vec = extract_translation(link2.model.transform);
+    Matrix link2_trans = MatrixTranslate(link2_trans_vec.x, link2_trans_vec.y, link2_trans_vec.z);
+
 
     float link2_angle_y = 0.0;
 
@@ -109,6 +111,14 @@ void draw_world_axes() {
     DrawCylinderEx(position, Vector3Add(position, xvec), thickness, thickness, sides, RED);
     DrawCylinderEx(position, Vector3Add(position, yvec), thickness, thickness, sides, GREEN);
     DrawCylinderEx(position, Vector3Add(position, zvec), thickness, thickness, sides, BLUE);
+}
+
+Vector3 extract_translation(const Matrix &m) {
+    return Vector3 {
+        .x = m.m12,
+        .y = m.m13,
+        .z = m.m14
+    };
 }
 
 Link::Link(const char *model_path) : model(LoadModel(model_path)) {}
