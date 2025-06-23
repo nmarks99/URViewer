@@ -18,13 +18,21 @@ constexpr Matrix TS1 {
     0.000000, 0.000000, 0.000000, 1.000000,
 };
 
-constexpr Matrix T12 {
+constexpr Matrix TS2 {
     0.000796, -0.999998, -0.001593, -0.120000,
     -1.000000, -0.000796, -0.000001, 0.156904,
     0.000000, 0.001593, -0.999999, 0.000191,
     0.000000, 0.000000, 0.000000, 1.000000,
 };
 
-const Matrix TS2 = MatrixMultiply(TS1, T12);
+constexpr Matrix TS3 {
+    0.000796, 0.999994, 0.003186, -0.020364,
+    -1.000000, 0.000796, 0.000002, 0.613984,
+    0.000000, -0.003186, 0.999995, -0.000128,
+    0.000000, 0.000000, 0.000000, 1.000000
+};
+
+const Matrix T12 = MatrixMultiply(MatrixInvert(TS1), TS2);
+const Matrix T23 = MatrixMultiply(MatrixInvert(TS2), TS3);
 
 #endif
