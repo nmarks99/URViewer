@@ -97,8 +97,9 @@ int main(void) {
 
     // Vector3 j1_trans_vec = extract_translation(link1.model.transform);
     // Matrix j1_trans = MatrixTranslate(j1_trans_vec.x, j1_trans_vec.y, j1_trans_vec.z);
-    float joint1 = PI/4;
-    float joint2 = PI/4;
+    float joint1 = -PI/8;
+    float joint2 = PI/3;
+    float joint3 = 0.0;
 
     while (!WindowShouldClose()) {
         if (IsKeyDown(KEY_LEFT_CONTROL)) {
@@ -108,7 +109,7 @@ int main(void) {
 
         // update for joint1 changes
         link1.model.transform = MatrixMultiply(TS1, MatrixRotateY(joint1));
-        link2.model.transform = MatrixMultiply(T12, link1.model.transform);
+        link2.model.transform = MatrixMultiply(MatrixMultiply(T12, MatrixRotateX(joint2)), link1.model.transform);
         link3.model.transform = MatrixMultiply(T23, link2.model.transform);
         link4.model.transform = MatrixMultiply(T34, link3.model.transform);
         link5.model.transform = MatrixMultiply(T45, link4.model.transform);
