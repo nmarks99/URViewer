@@ -47,31 +47,26 @@ int main(void) {
     SetTargetFPS(60);
 
     // Load models and apply initial transforms
-    Link base("models/Base_UR3.gltf");
-    base.model.transform = MatrixIdentity();
+    Link base("models/base.gltf");
+    base.model.transform = TSBASE;
 
     Link link1("models/shoulder.gltf");
-    link1.model.transform = TS1;
+    link1.model.transform = MatrixMultiply(TB1, base.model.transform);
 
     Link link2("models/upperarm.gltf");
     link2.model.transform = MatrixMultiply(T12, link1.model.transform);
-    const Matrix TS2 = link2.model.transform;
 
     Link link3("models/forearm.gltf");
     link3.model.transform = MatrixMultiply(T23, link2.model.transform);
-    const Matrix TS3 = link3.model.transform;
 
     Link link4("models/wrist1.gltf");
     link4.model.transform = MatrixMultiply(T34, link3.model.transform);
-    const Matrix TS4 = link4.model.transform;
 
     Link link5("models/wrist2.gltf");
     link5.model.transform = MatrixMultiply(T45, link4.model.transform);
-    const Matrix TS5 = link5.model.transform;
 
     Link link6("models/wrist3.gltf");
     link6.model.transform = MatrixMultiply(T56, link5.model.transform);
-    const Matrix TS6 = link6.model.transform;
 
     // Values to store joint angles in radians
     float joint1 = 0.0;
@@ -87,7 +82,7 @@ int main(void) {
         }
 
         // update transforms based on joint changes
-        link1.model.transform = MatrixMultiply(TS1, MatrixRotateY(joint1));
+        link1.model.transform = MatrixMultiply(MatrixMultiply(MatrixRotateY(joint1), TB1), base.model.transform);
         link2.model.transform = MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint2), T12), link1.model.transform);
         link3.model.transform = MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint3), T23), link2.model.transform);
         link4.model.transform = MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint4), T34), link3.model.transform);

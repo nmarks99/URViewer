@@ -1,18 +1,23 @@
+// UR3e
+// This file uses raymath.h to create 4x4 homogenous transformation
+// matrices which define the position and orientation of each of the robot
+// links in the kinematic chain
+//
+// Note: Do not take the below transforms as truth. They were chosen
+// experimentally based on what is *visually* correct
+
 #ifndef _UR3E_HPP
 #define _UR3E_HPP
 
 #include "raylib.h"
 #include "raymath.h"
 
-// Note: Do not take the below transforms as truth. They were chosen
-// experimentally based on what looked visually correct
+const Matrix TSBASE = MatrixRotateX(-PI/2);
 
-constexpr Matrix TS1 {
-    1.000000, 0.000000, 0.000000, 0.000000,
-    0.000000, 1.000000, 0.000000, 0.15000,
-    0.000000, 0.000000, 1.000000, 0.000000,
-    0.000000, 0.000000, 0.000000, 1.000000,
-};
+const Matrix TB1 = MatrixMultiply(
+    MatrixTranslate(0.0, 0.15, 0.0),
+    MatrixRotateXYZ({PI/2, 0.0, 0.0})
+);
 
 const Matrix T12 = MatrixMultiply(
     MatrixTranslate(0.0, 0.0, -0.12),
