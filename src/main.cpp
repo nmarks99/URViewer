@@ -6,15 +6,8 @@
 #include "UR3e.hpp"
 
 void draw_world_axes();
-void print_matrix(const Matrix &m) {
-    printf("%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, %.4f,\n",
-           m.m0, m.m4, m.m8, m.m12,
-           m.m1, m.m5, m.m9, m.m13,
-           m.m2, m.m6, m.m10, m.m14,
-           m.m3, m.m7, m.m11, m.m15
-    );
-}
-Vector3 extract_translation(const Matrix &m);
+
+void print_matrix(const Matrix &m);
 
 struct Link {
   public:
@@ -46,86 +39,71 @@ int main(void) {
     // Define the camera to look into our 3d world
     Camera camera = {0};
     camera.position = Vector3{1.0f, 1.0f, 1.0f}; // Camera position
-    camera.target = Vector3{0.0f, 0.25f, 0.0f};   // Camera looking at point
+    camera.target = Vector3{0.0f, 0.25f, 0.0f};  // Camera looking at point
     camera.up = Vector3{0.0f, 1.0f, 0.0f};       // Camera up vector (rotation towards target)
     camera.fovy = 45.0f;                         // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;      // Camera mode type
 
     SetTargetFPS(60);
 
-    // Load models
+    // Load models and apply initial transforms
     Link base("models/Base_UR3.gltf");
     base.model.transform = MatrixIdentity();
 
-    Link link1("models/shoulder_new.gltf");
+    Link link1("models/shoulder.gltf");
     link1.model.transform = TS1;
 
-    Link link2("models/upperarm_new.gltf");
+    Link link2("models/upperarm.gltf");
     link2.model.transform = MatrixMultiply(T12, link1.model.transform);
     const Matrix TS2 = link2.model.transform;
-    printf("link2.model.transform = \n");
-    print_matrix(link2.model.transform);
-    printf("\n");
 
-    // Link link3("models/Link3_UR3.gltf");
-    Link link3("models/forearm_new.gltf");
+    Link link3("models/forearm.gltf");
     link3.model.transform = MatrixMultiply(T23, link2.model.transform);
     const Matrix TS3 = link3.model.transform;
-    printf("link3.model.transform = \n");
-    print_matrix(link3.model.transform);
-    printf("\n");
 
-    Link link4("models/wrist1_new.gltf");
+    Link link4("models/wrist1.gltf");
     link4.model.transform = MatrixMultiply(T34, link3.model.transform);
     const Matrix TS4 = link4.model.transform;
-    printf("link4.model.transform = \n");
-    print_matrix(link4.model.transform);
-    printf("\n");
 
-    Link link5("models/wrist2_new.gltf");
+    Link link5("models/wrist2.gltf");
     link5.model.transform = MatrixMultiply(T45, link4.model.transform);
     const Matrix TS5 = link5.model.transform;
-    printf("link5.model.transform = \n");
-    print_matrix(link5.model.transform);
-    printf("\n");
 
-    Link link6("models/wrist3_new.gltf");
+    Link link6("models/wrist3.gltf");
     link6.model.transform = MatrixMultiply(T56, link5.model.transform);
     const Matrix TS6 = link6.model.transform;
-    printf("link6.model.transform = \n");
-    print_matrix(link6.model.transform);
-    printf("\n");
 
-    // Vector3 j1_trans_vec = extract_translation(link1.model.transform);
-    // Matrix j1_trans = MatrixTranslate(j1_trans_vec.x, j1_trans_vec.y, j1_trans_vec.z);
+    // Values to store joint angles in radians
     float joint1 = 0.0;
     float joint2 = 0.0;
     float joint3 = 0.0;
+    float joint4 = 0.0;
+    float joint5 = 0.0;
+    float joint6 = 0.0;
 
     while (!WindowShouldClose()) {
         if (IsKeyDown(KEY_LEFT_CONTROL) or IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) {
             UpdateCamera(&camera, CAMERA_THIRD_PERSON);
         }
 
-
-        // update for joint1 changes
+        // update transforms based on joint changes
         link1.model.transform = MatrixMultiply(TS1, MatrixRotateY(joint1));
-        link2.model.transform = MatrixMultiply(MatrixMultiply(T12, MatrixRotateZ(joint2)), link1.model.transform);
-        link3.model.transform = MatrixMultiply(T23, link2.model.transform);
-        link4.model.transform = MatrixMultiply(T34, link3.model.transform);
-        link5.model.transform = MatrixMultiply(T45, link4.model.transform);
-        link6.model.transform = MatrixMultiply(T56, link5.model.transform);
+        link2.model.transform = MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint2), T12), link1.model.transform);
+        link3.model.transform = MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint3), T23), link2.model.transform);
+        link4.model.transform = MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint4), T34), link3.model.transform);
+        link5.model.transform = MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint5), T45), link4.model.transform);
+        link6.model.transform = MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint6), T56), link5.model.transform);
 
         // DRAW /////////////////////////////////
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        GuiSlider((Rectangle){96, 48, 216, 16}, TextFormat("%0.2f", joint1), NULL, &joint1, -2 * 3.14f,
-                  2 * 3.14f);
-        GuiSlider((Rectangle){96, 68, 216, 16}, TextFormat("%0.2f", joint2), NULL, &joint2, -2 * 3.14f,
-                  2 * 3.14f);
-        GuiSlider((Rectangle){96, 88, 216, 16}, TextFormat("%0.2f", joint3), NULL, &joint3, -2 * 3.14f,
-                  2 * 3.14f);
+        GuiSlider((Rectangle){50, 20, 216, 16}, TextFormat("%0.2f", joint1), NULL, &joint1, -PI, PI);
+        GuiSlider((Rectangle){50, 40, 216, 16}, TextFormat("%0.2f", joint2), NULL, &joint2, -PI, PI);
+        GuiSlider((Rectangle){50, 60, 216, 16}, TextFormat("%0.2f", joint3), NULL, &joint3, -PI, PI);
+        GuiSlider((Rectangle){50, 80, 216, 16}, TextFormat("%0.2f", joint4), NULL, &joint4, -PI, PI);
+        GuiSlider((Rectangle){50, 100, 216, 16}, TextFormat("%0.2f", joint5), NULL, &joint5, -PI, PI);
+        GuiSlider((Rectangle){50, 120, 216, 16}, TextFormat("%0.2f", joint6), NULL, &joint6, -PI, PI);
 
         // 3D -------------
         BeginMode3D(camera);
@@ -176,8 +154,6 @@ void draw_world_axes() {
     DrawCylinderEx(position, Vector3Add(position, zvec), thickness, thickness, sides, BLUE);
 }
 
-Vector3 extract_translation(const Matrix &m) { return Vector3{.x = m.m12, .y = m.m13, .z = m.m14}; }
-
 Link::Link(const char *model_path) : model(LoadModel(model_path)) {}
 
 Link::~Link() {
@@ -201,4 +177,11 @@ void Link::draw_axes() {
     DrawCylinderEx(origin, x_end, thickness, thickness, sides, RED);
     DrawCylinderEx(origin, y_end, thickness, thickness, sides, GREEN);
     DrawCylinderEx(origin, z_end, thickness, thickness, sides, BLUE);
+}
+
+void print_matrix(const Matrix &m) {
+    printf("%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, "
+           "%.4f,\n",
+           m.m0, m.m4, m.m8, m.m12, m.m1, m.m5, m.m9, m.m13, m.m2, m.m6, m.m10, m.m14, m.m3, m.m7, m.m11,
+           m.m15);
 }
