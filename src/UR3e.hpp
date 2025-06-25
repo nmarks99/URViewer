@@ -32,7 +32,7 @@ constexpr Matrix TS3 {
     0.000000, 0.000000, 0.000000, 1.000000
 };
 
-const Matrix T12 = MatrixMultiply(MatrixInvert(TS1), TS2);
-const Matrix T23 = MatrixMultiply(MatrixInvert(TS2), TS3);
+// const Matrix T12 = MatrixMultiply(MatrixInvert(TS1), TS2);
+// const Matrix T23 = MatrixMultiply(MatrixInvert(TS2), TS3);
 
 #endif

@@ -38,7 +38,7 @@ constexpr Matrix Rz(float th) {
 
 void draw_world_axes();
 void print_matrix(const Matrix &m) {
-    printf("%f, %f, %f, %f,\n%f, %f, %f, %f,\n%f, %f, %f, %f,\n%f, %f, %f, %f,\n",
+    printf("%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, %.4f,\n",
            m.m0, m.m4, m.m8, m.m12,
            m.m1, m.m5, m.m9, m.m13,
            m.m2, m.m6, m.m10, m.m14,
@@ -77,7 +77,7 @@ int main(void) {
     // Define the camera to look into our 3d world
     Camera camera = {0};
     camera.position = Vector3{1.0f, 1.0f, 1.0f}; // Camera position
-    camera.target = Vector3{0.0f, 0.0f, 0.0f};   // Camera looking at point
+    camera.target = Vector3{0.0f, 0.25f, 0.0f};   // Camera looking at point
     camera.up = Vector3{0.0f, 1.0f, 0.0f};       // Camera up vector (rotation towards target)
     camera.fovy = 45.0f;                         // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;      // Camera mode type
@@ -92,27 +92,45 @@ int main(void) {
     link1.model.transform = TS1;
 
     Link link2("models/Link2_UR3.gltf");
-    link2.model.transform = MatrixMultiply(Rz(-1.57), link1.model.transform);
-    link2.model.transform = MatrixMultiply(Rx(3.14), link2.model.transform);
-    // link2.model.transform = MatrixMultiply(MatrixRotateZ(-1.57), link1.model.transform);
-    // link2.model.transform = MatrixMultiply(MatrixRotateX(3.14), link2.model.transform);
-    link2.model.transform = MatrixMultiply(MatrixTranslate(0.0, 0.12, 0.0), link2.model.transform);
-    // print_matrix(link2.model.transform);
+    const Matrix T12 = MatrixMultiply(
+        MatrixTranslate(0.0, 0.12, 0.0),
+        MatrixRotateZYX({PI, 0.0, -PI/2})
+    );
+    link2.model.transform = MatrixMultiply(T12, link1.model.transform);
+    printf("link2.model.transform = \n");
+    print_matrix(link2.model.transform);
+    printf("\n");
 
     Link link3("models/Link3_UR3.gltf");
-    link3.model.transform = TS3;
-    // link3.model.transform = MatrixMultiply(MatrixRotateX(3.14), link2.model.transform);
-    // link3.model.transform = MatrixMultiply(MatrixTranslate(-0.457,0.1,0.0), link3.model.transform);
-    // print_matrix(link3.model.transform);
+    const Matrix T23 = MatrixMultiply(
+        MatrixTranslate(-0.457, 0.09, 0.0),
+        MatrixRotateXYZ({PI, 0.0, 0.0})
+    );
+    link3.model.transform = MatrixMultiply(T23, link2.model.transform);
+    printf("link3.model.transform = \n");
+    print_matrix(link3.model.transform);
+    printf("\n");
 
     Link link4("models/Link4_UR3.gltf");
-    link4.model.transform = MatrixMultiply(link4.model.transform, MatrixTranslate(0.0, 0.0, -0.25));
+    link4.model.transform = MatrixMultiply(MatrixRotateXYZ({0.0, PI, PI/2}), link3.model.transform);
+    link4.model.transform = MatrixMultiply(MatrixTranslate(-0.1, 0.0, 0.0), link4.model.transform);
+    printf("link4.model.transform = \n");
+    print_matrix(link4.model.transform);
+    printf("\n");
 
     Link link5("models/Link5_UR3.gltf");
-    link5.model.transform = MatrixMultiply(link5.model.transform, MatrixTranslate(0.0, 0.0, -0.25));
+    link5.model.transform = MatrixMultiply(MatrixRotateXYZ({0.0, PI, PI/2}), link4.model.transform);
+    link5.model.transform = MatrixMultiply(MatrixTranslate(-0.085, 0.0, 0.0), link5.model.transform);
+    printf("link5.model.transform = \n");
+    print_matrix(link5.model.transform);
+    printf("\n");
 
     Link link6("models/Link6_UR3.gltf");
-    link6.model.transform = MatrixMultiply(link6.model.transform, MatrixTranslate(0.5, 0.0, 0.0));
+    link6.model.transform = MatrixMultiply(MatrixRotateXYZ({-PI/2, 0.0, 0.0}), link5.model.transform);
+    link6.model.transform = MatrixMultiply(MatrixTranslate(0.0, 0.0, -0.09), link6.model.transform);
+    printf("link6.model.transform = \n");
+    print_matrix(link6.model.transform);
+    printf("\n");
 
     Vector3 j1_trans_vec = extract_translation(link1.model.transform);
     Matrix j1_trans = MatrixTranslate(j1_trans_vec.x, j1_trans_vec.y, j1_trans_vec.z);
@@ -157,14 +175,14 @@ int main(void) {
         link3.draw();
         link3.draw_axes();
 
-        // link4.draw();
-        // link4.draw_axes();
-//
-        // link5.draw();
-        // link5.draw_axes();
-//
-        // link6.draw();
-        // link6.draw_axes();
+        link4.draw();
+        link4.draw_axes();
+
+        link5.draw();
+        link5.draw_axes();
+
+        link6.draw();
+        link6.draw_axes();
 
         draw_world_axes();
         DrawGrid(20, 0.25f);
