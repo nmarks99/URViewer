@@ -7,8 +7,6 @@
 
 void draw_world_axes();
 
-void print_matrix(const Matrix &m);
-
 struct Link {
   public:
     Model model;
@@ -22,13 +20,15 @@ struct Link {
 };
 
 struct Window {
-    Window(int width, int height, const char *title) { InitWindow(width, height, title); };
+    Window(int width, int height, const char *title) {
+        InitWindow(width, height, title);
+    };
 
     ~Window() {
-        TraceLog(LOG_INFO, "Closing window\n");
         CloseWindow();
     }
 };
+
 
 int main(void) {
 
@@ -76,6 +76,8 @@ int main(void) {
     float joint5 = 0.0;
     float joint6 = 0.0;
 
+    bool show_axes = false;
+
     while (!WindowShouldClose()) {
         if (IsKeyDown(KEY_LEFT_CONTROL) or IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) {
             UpdateCamera(&camera, CAMERA_THIRD_PERSON);
@@ -93,6 +95,7 @@ int main(void) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
+        // sliders to adjust joint angles
         GuiSlider((Rectangle){50, 20, 216, 16}, TextFormat("%0.2f", joint1), NULL, &joint1, -PI, PI);
         GuiSlider((Rectangle){50, 40, 216, 16}, TextFormat("%0.2f", joint2), NULL, &joint2, -PI, PI);
         GuiSlider((Rectangle){50, 60, 216, 16}, TextFormat("%0.2f", joint3), NULL, &joint3, -PI, PI);
@@ -100,31 +103,33 @@ int main(void) {
         GuiSlider((Rectangle){50, 100, 216, 16}, TextFormat("%0.2f", joint5), NULL, &joint5, -PI, PI);
         GuiSlider((Rectangle){50, 120, 216, 16}, TextFormat("%0.2f", joint6), NULL, &joint6, -PI, PI);
 
+        // check box to show/hide axes
+        GuiCheckBox((Rectangle){ static_cast<float>(GetScreenWidth()-100.0), 20, 15, 15 }, "Show axes", &show_axes);
+
         // 3D -------------
         BeginMode3D(camera);
 
+        // Draw all the models
         base.draw();
-        base.draw_axes();
-
         link1.draw();
-        link1.draw_axes();
-
         link2.draw();
-        link2.draw_axes();
-
         link3.draw();
-        link3.draw_axes();
-
         link4.draw();
-        link4.draw_axes();
-
         link5.draw();
-        link5.draw_axes();
-
         link6.draw();
-        link6.draw_axes();
 
-        draw_world_axes();
+        // show model and world axes if requested
+        if (show_axes) {
+            base.draw_axes();
+            link1.draw_axes();
+            link2.draw_axes();
+            link3.draw_axes();
+            link4.draw_axes();
+            link5.draw_axes();
+            link6.draw_axes();
+            draw_world_axes();
+        }
+
         DrawGrid(20, 0.25f);
 
         EndMode3D();
@@ -172,11 +177,4 @@ void Link::draw_axes() {
     DrawCylinderEx(origin, x_end, thickness, thickness, sides, RED);
     DrawCylinderEx(origin, y_end, thickness, thickness, sides, GREEN);
     DrawCylinderEx(origin, z_end, thickness, thickness, sides, BLUE);
-}
-
-void print_matrix(const Matrix &m) {
-    printf("%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, %.4f,\n%.4f, %.4f, %.4f, "
-           "%.4f,\n",
-           m.m0, m.m4, m.m8, m.m12, m.m1, m.m5, m.m9, m.m13, m.m2, m.m6, m.m10, m.m14, m.m3, m.m7, m.m11,
-           m.m15);
 }
