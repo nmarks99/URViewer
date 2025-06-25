@@ -57,38 +57,39 @@ int main(void) {
     Link base("models/Base_UR3.gltf");
     base.model.transform = MatrixIdentity();
 
-    Link link1("models/Link1_UR3.gltf");
+    Link link1("models/shoulder_new.gltf");
     link1.model.transform = TS1;
 
-    Link link2("models/Link2_UR3.gltf");
+    Link link2("models/upperarm_new.gltf");
     link2.model.transform = MatrixMultiply(T12, link1.model.transform);
     const Matrix TS2 = link2.model.transform;
     printf("link2.model.transform = \n");
     print_matrix(link2.model.transform);
     printf("\n");
 
-    Link link3("models/Link3_UR3.gltf");
+    // Link link3("models/Link3_UR3.gltf");
+    Link link3("models/forearm_new.gltf");
     link3.model.transform = MatrixMultiply(T23, link2.model.transform);
     const Matrix TS3 = link3.model.transform;
     printf("link3.model.transform = \n");
     print_matrix(link3.model.transform);
     printf("\n");
 
-    Link link4("models/Link4_UR3.gltf");
+    Link link4("models/wrist1_new.gltf");
     link4.model.transform = MatrixMultiply(T34, link3.model.transform);
     const Matrix TS4 = link4.model.transform;
     printf("link4.model.transform = \n");
     print_matrix(link4.model.transform);
     printf("\n");
 
-    Link link5("models/Link5_UR3.gltf");
+    Link link5("models/wrist2_new.gltf");
     link5.model.transform = MatrixMultiply(T45, link4.model.transform);
     const Matrix TS5 = link5.model.transform;
     printf("link5.model.transform = \n");
     print_matrix(link5.model.transform);
     printf("\n");
 
-    Link link6("models/Link6_UR3.gltf");
+    Link link6("models/wrist3_new.gltf");
     link6.model.transform = MatrixMultiply(T56, link5.model.transform);
     const Matrix TS6 = link6.model.transform;
     printf("link6.model.transform = \n");
@@ -97,19 +98,19 @@ int main(void) {
 
     // Vector3 j1_trans_vec = extract_translation(link1.model.transform);
     // Matrix j1_trans = MatrixTranslate(j1_trans_vec.x, j1_trans_vec.y, j1_trans_vec.z);
-    float joint1 = -PI/8;
-    float joint2 = PI/3;
+    float joint1 = 0.0;
+    float joint2 = 0.0;
     float joint3 = 0.0;
 
     while (!WindowShouldClose()) {
-        if (IsKeyDown(KEY_LEFT_CONTROL)) {
+        if (IsKeyDown(KEY_LEFT_CONTROL) or IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) {
             UpdateCamera(&camera, CAMERA_THIRD_PERSON);
         }
 
 
         // update for joint1 changes
         link1.model.transform = MatrixMultiply(TS1, MatrixRotateY(joint1));
-        link2.model.transform = MatrixMultiply(MatrixMultiply(T12, MatrixRotateX(joint2)), link1.model.transform);
+        link2.model.transform = MatrixMultiply(MatrixMultiply(T12, MatrixRotateZ(joint2)), link1.model.transform);
         link3.model.transform = MatrixMultiply(T23, link2.model.transform);
         link4.model.transform = MatrixMultiply(T34, link3.model.transform);
         link5.model.transform = MatrixMultiply(T45, link4.model.transform);
@@ -123,8 +124,8 @@ int main(void) {
                   2 * 3.14f);
         GuiSlider((Rectangle){96, 68, 216, 16}, TextFormat("%0.2f", joint2), NULL, &joint2, -2 * 3.14f,
                   2 * 3.14f);
-        // GuiSlider((Rectangle){96, 88, 216, 16}, TextFormat("%0.2f", joint3), NULL, &joint3, -2 * 3.14f,
-                  // 2 * 3.14f);
+        GuiSlider((Rectangle){96, 88, 216, 16}, TextFormat("%0.2f", joint3), NULL, &joint3, -2 * 3.14f,
+                  2 * 3.14f);
 
         // 3D -------------
         BeginMode3D(camera);
