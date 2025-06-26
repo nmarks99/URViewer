@@ -13,6 +13,7 @@ struct Link {
 
     Link(const char *model_path);
     ~Link();
+    Link& operator=(const Link&) = delete;
 
     void draw();
     void draw_wires();
@@ -27,6 +28,8 @@ struct Window {
     ~Window() {
         CloseWindow();
     }
+
+    Window& operator=(const Window&) = delete;
 };
 
 
