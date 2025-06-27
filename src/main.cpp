@@ -13,6 +13,9 @@ struct Link {
 
     Link(const char *model_path);
     ~Link();
+
+    // delete copy constructor and copy assignment operator
+    Link(const Link&) = delete;
     Link& operator=(const Link&) = delete;
 
     void draw();
@@ -29,6 +32,8 @@ struct Window {
         CloseWindow();
     }
 
+    // delete copy constructor and copy assignment operator
+    Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;
 };
 
