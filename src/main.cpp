@@ -1,3 +1,5 @@
+#include <string>
+#include <filesystem>
 #include "raylib.h"
 #include "raymath.h"
 #define RAYGUI_IMPLEMENTATION
@@ -40,8 +42,13 @@ struct Window {
 
 int main(void) {
 
+    // cmake defines the URVIEWER_MODEL_DIR macro
+    std::filesystem::path model_dir = URVIEWER_MODEL_DIR;
+
+    // initialize the window
     SetTraceLogLevel(LOG_FATAL);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetTargetFPS(60);
     Window window(800, 800, "UR Robot Viewer");
 
     // Define the camera to look into our 3d world
@@ -52,28 +59,26 @@ int main(void) {
     camera.fovy = 45.0f;                         // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;      // Camera mode type
 
-    SetTargetFPS(60);
-
     // Load models and apply initial transforms
-    Link base("models/base.gltf");
+    Link base((model_dir / "obj/base.obj").string().c_str());
     base.model.transform = TSBASE;
 
-    Link link1("models/shoulder.gltf");
+    Link link1((model_dir / "obj/shoulder.obj").string().c_str());
     link1.model.transform = MatrixMultiply(TB1, base.model.transform);
 
-    Link link2("models/upperarm.gltf");
+    Link link2((model_dir / "obj/upperarm.obj").string().c_str());
     link2.model.transform = MatrixMultiply(T12, link1.model.transform);
 
-    Link link3("models/forearm.gltf");
+    Link link3((model_dir / "obj/forearm.obj").string().c_str());
     link3.model.transform = MatrixMultiply(T23, link2.model.transform);
 
-    Link link4("models/wrist1.gltf");
+    Link link4((model_dir / "obj/wrist1.obj").string().c_str());
     link4.model.transform = MatrixMultiply(T34, link3.model.transform);
 
-    Link link5("models/wrist2.gltf");
+    Link link5((model_dir / "obj/wrist2.obj").string().c_str());
     link5.model.transform = MatrixMultiply(T45, link4.model.transform);
 
-    Link link6("models/wrist3.gltf");
+    Link link6((model_dir / "obj/wrist3.obj").string().c_str());
     link6.model.transform = MatrixMultiply(T56, link5.model.transform);
 
     // Values to store joint angles in radians
