@@ -10,26 +10,24 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Local cmake projects might be built here
-list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/.local")
-
-# # Built binaries in build/bin, libraries in build/lib
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-
-find_package(raylib REQUIRED STATIC CONFIG)
+find_package(raylib REQUIRED STATIC CONFIG HINTS ${raylib_DIR})
 if(raylib_FOUND)
     message(STATUS "raylib found!")
     message(STATUS "raylib DIR: ${raylib_DIR}")
 endif()
 
+find_package(ur_rtde CONFIG REQUIRED STATIC HINTS ${ur_rtde_DIR})
+if(ur_rtde_FOUND)
+    message(STATUS "ur_rtde found!")
+    message(STATUS "ur_rtde DIR: ${ur_rtde_DIR}")
+endif()
+
 add_executable(URViewer src/main.cpp)
 target_include_directories(URViewer
     PRIVATE src
-    "$ENV{HOME}/.local/src/raygui/src"
 )
 
 target_link_libraries(URViewer
     PRIVATE raylib 
+    PRIVATE ur_rtde::rtde
 )
