@@ -30,6 +30,7 @@ add_executable(URViewer src/main.cpp)
 
 target_include_directories(URViewer
     PRIVATE src
+    PRIVATE external
 )
 
 target_link_libraries(URViewer
