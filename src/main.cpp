@@ -9,38 +9,7 @@
 #include "ur_rtde/rtde_receive_interface.h"
 
 #include "UR3e.hpp"
-
-void draw_world_axes();
-
-struct Link {
-  public:
-    Model model;
-
-    Link(const char *model_path);
-    ~Link();
-
-    // delete copy constructor and copy assignment operator
-    Link(const Link&) = delete;
-    Link& operator=(const Link&) = delete;
-
-    void draw();
-    void draw_wires();
-    void draw_axes();
-};
-
-struct Window {
-    Window(int width, int height, const char *title) {
-        InitWindow(width, height, title);
-    };
-
-    ~Window() {
-        CloseWindow();
-    }
-
-    // delete copy constructor and copy assignment operator
-    Window(const Window&) = delete;
-    Window& operator=(const Window&) = delete;
-};
+#include "utils.hpp"
 
 
 int main(void) {
@@ -52,7 +21,7 @@ int main(void) {
     SetTraceLogLevel(LOG_FATAL);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
-    Window window(800, 800, "UR Robot Viewer");
+    RLWindow window(800, 800, "UR Robot Viewer");
 
     // Define the camera to look into our 3d world
     Camera camera = {0};
@@ -63,25 +32,25 @@ int main(void) {
     camera.projection = CAMERA_PERSPECTIVE;      // Camera mode type
 
     // Load models and apply initial transforms
-    Link base((model_dir / "obj/base.obj").string().c_str());
+    RLModel base((model_dir / "obj/base.obj").string().c_str());
     base.model.transform = TSBASE;
 
-    Link link1((model_dir / "obj/shoulder.obj").string().c_str());
+    RLModel link1((model_dir / "obj/shoulder.obj").string().c_str());
     link1.model.transform = MatrixMultiply(TB1, base.model.transform);
 
-    Link link2((model_dir / "obj/upperarm.obj").string().c_str());
+    RLModel link2((model_dir / "obj/upperarm.obj").string().c_str());
     link2.model.transform = MatrixMultiply(T12, link1.model.transform);
 
-    Link link3((model_dir / "obj/forearm.obj").string().c_str());
+    RLModel link3((model_dir / "obj/forearm.obj").string().c_str());
     link3.model.transform = MatrixMultiply(T23, link2.model.transform);
 
-    Link link4((model_dir / "obj/wrist1.obj").string().c_str());
+    RLModel link4((model_dir / "obj/wrist1.obj").string().c_str());
     link4.model.transform = MatrixMultiply(T34, link3.model.transform);
 
-    Link link5((model_dir / "obj/wrist2.obj").string().c_str());
+    RLModel link5((model_dir / "obj/wrist2.obj").string().c_str());
     link5.model.transform = MatrixMultiply(T45, link4.model.transform);
 
-    Link link6((model_dir / "obj/wrist3.obj").string().c_str());
+    RLModel link6((model_dir / "obj/wrist3.obj").string().c_str());
     link6.model.transform = MatrixMultiply(T56, link5.model.transform);
 
     // Values to store joint angles in radians
@@ -143,7 +112,7 @@ int main(void) {
             link4.draw_axes();
             link5.draw_axes();
             link6.draw_axes();
-            draw_world_axes();
+            draw_axes_3d(0.01, MatrixIdentity());
         }
 
         DrawGrid(20, 0.25f);
@@ -156,41 +125,4 @@ int main(void) {
     }
 
     return 0;
-}
-
-void draw_world_axes() {
-    const float thickness = 0.010;
-    const Vector3 xvec{0.1, 0.0, 0.0};
-    const Vector3 yvec{0.0, 0.1, 0.0};
-    const Vector3 zvec{0.0, 0.0, 0.1};
-    const Vector3 position{0.0, 0.0, 0.0};
-    const int sides = 20;
-    DrawCylinderEx(position, Vector3Add(position, xvec), thickness, thickness, sides, RED);
-    DrawCylinderEx(position, Vector3Add(position, yvec), thickness, thickness, sides, GREEN);
-    DrawCylinderEx(position, Vector3Add(position, zvec), thickness, thickness, sides, BLUE);
-}
-
-Link::Link(const char *model_path) : model(LoadModel(model_path)) {}
-
-Link::~Link() {
-    if (model.meshCount > 0) {
-        TraceLog(LOG_INFO, "Unloading model\n");
-        UnloadModel(model);
-    }
-}
-
-void Link::draw() { DrawModel(model, Vector3Zeros, 1.0, WHITE); }
-
-void Link::draw_wires() { DrawModelWires(model, Vector3Zeros, 1.0, WHITE); }
-
-void Link::draw_axes() {
-    const float thickness = 0.005;
-    const int sides = 20;
-    auto origin = Vector3Transform(Vector3Zeros, model.transform);
-    auto x_end = Vector3Transform({0.1, 0.0, 0.0}, model.transform);
-    auto y_end = Vector3Transform({0.0, 0.1, 0.0}, model.transform);
-    auto z_end = Vector3Transform({0.0, 0.0, 0.1}, model.transform);
-    DrawCylinderEx(origin, x_end, thickness, thickness, sides, RED);
-    DrawCylinderEx(origin, y_end, thickness, thickness, sides, GREEN);
-    DrawCylinderEx(origin, z_end, thickness, thickness, sides, BLUE);
 }
