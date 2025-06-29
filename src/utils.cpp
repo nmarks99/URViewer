@@ -1,8 +1,8 @@
 #include "utils.hpp"
 #include "raymath.h"
 
-
 RLModel::RLModel(const char *model_path) : model(LoadModel(model_path)) {}
+RLModel::RLModel(std::filesystem::path model_path) : model(LoadModel(model_path.string().c_str())) {}
 
 RLModel::~RLModel() {
     if (model.meshCount > 0) {
@@ -15,19 +15,11 @@ void RLModel::draw() { DrawModel(model, Vector3Zeros, 1.0, WHITE); }
 
 void RLModel::draw_wires() { DrawModelWires(model, Vector3Zeros, 1.0, WHITE); }
 
-void RLModel::draw_axes() {
-    draw_axes_3d(0.005, model.transform);
-}
+void RLModel::draw_axes() { draw_axes_3d(0.005, model.transform); }
 
+RLWindow::RLWindow(int width, int height, const char *title) { InitWindow(width, height, title); };
 
-RLWindow::RLWindow(int width, int height, const char *title) {
-    InitWindow(width, height, title);
-};
-
-RLWindow::~RLWindow() {
-    CloseWindow();
-}
-
+RLWindow::~RLWindow() { CloseWindow(); }
 
 void draw_axes_3d(float thickness, Matrix transform) {
     constexpr int sides = 20;
@@ -39,4 +31,3 @@ void draw_axes_3d(float thickness, Matrix transform) {
     DrawCylinderEx(origin, y_end, thickness, thickness, sides, GREEN);
     DrawCylinderEx(origin, z_end, thickness, thickness, sides, BLUE);
 }
-

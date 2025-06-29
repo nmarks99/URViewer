@@ -29,6 +29,7 @@ add_compile_definitions(URVIEWER_MODEL_DIR="${CMAKE_CURRENT_SOURCE_DIR}/models")
 add_executable(URViewer
     src/main.cpp
     src/utils.cpp
+    src/ur.cpp
 )
 
 target_include_directories(URViewer
