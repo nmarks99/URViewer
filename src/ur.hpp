@@ -54,11 +54,11 @@ namespace UR3e {
 
     const Matrix T45 = MatrixMultiply(
         MatrixTranslate(0.0, 0.0, 0.085),
-        MatrixRotateXYZ({PI/2, 0.0, 0.0})
+        MatrixRotateXYZ({PI/2, 0.0, PI/2})
     );
 
     const Matrix T56 = MatrixMultiply(
-        MatrixTranslate(0.0, 0.0, -0.072),
-        MatrixRotateXYZ({-PI/2, 0.0, 0.0})
+        MatrixTranslate(0.0, 0.0, 0.072),
+        MatrixRotateXYZ({PI/2, 0.0, 0.0})
     );
 }

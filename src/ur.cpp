@@ -57,13 +57,13 @@ void UR::update(const std::vector<double> &joint_angles) {
 }
 
 void UR::draw() {
-    base.draw_wires();
-    link1.draw_wires();
-    link2.draw_wires();
-    link3.draw_wires();
-    link4.draw_wires();
-    link5.draw_wires();
-    // link6.draw_wires();
+    base.draw();
+    link1.draw();
+    link2.draw();
+    link3.draw();
+    link4.draw();
+    link5.draw();
+    link6.draw();
 }
 
 void UR::draw_axes() {
@@ -73,5 +73,5 @@ void UR::draw_axes() {
     link3.draw_axes();
     link4.draw_axes();
     link5.draw_axes();
-    // link6.draw_axes();
+    link6.draw_axes();
 }
