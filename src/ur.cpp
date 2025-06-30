@@ -43,7 +43,7 @@ UR::UR(URVersion version) :
 
 void UR::update(const std::vector<double> &joint_angles) {
     link1.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateY(joint_angles.at(0)), UR3e::TB1), base.model.transform);
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(0)), UR3e::TB1), base.model.transform);
     link2.model.transform =
         MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(1)), UR3e::T12), link1.model.transform);
     link3.model.transform =
@@ -57,13 +57,13 @@ void UR::update(const std::vector<double> &joint_angles) {
 }
 
 void UR::draw() {
-    base.draw();
-    link1.draw();
-    link2.draw();
-    link3.draw();
-    link4.draw();
-    link5.draw();
-    link6.draw();
+    base.draw_wires();
+    link1.draw_wires();
+    link2.draw_wires();
+    link3.draw_wires();
+    link4.draw_wires();
+    // link5.draw_wires();
+    // link6.draw_wires();
 }
 
 void UR::draw_axes() {
@@ -72,6 +72,6 @@ void UR::draw_axes() {
     link2.draw_axes();
     link3.draw_axes();
     link4.draw_axes();
-    link5.draw_axes();
-    link6.draw_axes();
+    // link5.draw_axes();
+    // link6.draw_axes();
 }

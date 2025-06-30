@@ -33,22 +33,22 @@ namespace UR3e {
     const Matrix TSBASE = MatrixRotateX(-PI/2);
 
     const Matrix TB1 = MatrixMultiply(
-        MatrixTranslate(0.0, 0.15, 0.0),
-        MatrixRotateXYZ({PI/2, 0.0, 0.0})
+        MatrixTranslate(0.0, 0.0, 0.15),
+        MatrixRotateXYZ({0.0, 0.0, 0.0})
     );
 
     const Matrix T12 = MatrixMultiply(
-        MatrixTranslate(0.0, 0.0, -0.12),
-        MatrixRotateXYZ({0.0, PI, 0.0})
+        MatrixTranslate(0.0, 0.0, 0.12),
+        MatrixRotateXYZ({-PI/2, 0.0, -PI/2})
     );
 
     const Matrix T23 = MatrixMultiply(
-        MatrixTranslate(0.0, 0.245, -0.09),
+        MatrixTranslate(0.0, 0.245, 0.09),
         MatrixRotateXYZ({0.0, PI, 0.0})
     );
 
     const Matrix T34 = MatrixMultiply(
-        MatrixTranslate(0.0, 0.212, -0.1),
+        MatrixTranslate(0.0, 0.212, 0.1),
         MatrixRotateXYZ({0.0, PI, 0.0})
     );
 
