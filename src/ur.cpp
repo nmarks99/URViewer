@@ -62,7 +62,7 @@ void UR::draw() {
     link2.draw_wires();
     link3.draw_wires();
     link4.draw_wires();
-    // link5.draw_wires();
+    link5.draw_wires();
     // link6.draw_wires();
 }
 
@@ -72,6 +72,6 @@ void UR::draw_axes() {
     link2.draw_axes();
     link3.draw_axes();
     link4.draw_axes();
-    // link5.draw_axes();
+    link5.draw_axes();
     // link6.draw_axes();
 }
