@@ -18,23 +18,23 @@ std::string get_model_dir(URVersion version) {
 UR::UR(URVersion version) :
     model_dir_(get_model_dir(version)),
     base(model_dir_ / "base.obj"),
-    link1(model_dir_ / "shoulder.obj"),
-    link2(model_dir_ / "upperarm.obj"),
-    link3(model_dir_ / "forearm.obj"),
-    link4(model_dir_ / "wrist1.obj"),
-    link5(model_dir_ / "wrist2.obj"),
-    link6(model_dir_ / "wrist3.obj")
+    shoulder(model_dir_ / "shoulder.obj"),
+    upperarm(model_dir_ / "upperarm.obj"),
+    forearm(model_dir_ / "forearm.obj"),
+    wrist1(model_dir_ / "wrist1.obj"),
+    wrist2(model_dir_ / "wrist2.obj"),
+    wrist3(model_dir_ / "wrist3.obj")
 {
 
     switch (version) {
     case URVersion::UR3e:
         base.model.transform = UR3e::TSBASE;
-        link1.model.transform = MatrixMultiply(UR3e::TB1, base.model.transform);
-        link2.model.transform = MatrixMultiply(UR3e::T12, link1.model.transform);
-        link3.model.transform = MatrixMultiply(UR3e::T23, link2.model.transform);
-        link4.model.transform = MatrixMultiply(UR3e::T34, link3.model.transform);
-        link5.model.transform = MatrixMultiply(UR3e::T45, link4.model.transform);
-        link6.model.transform = MatrixMultiply(UR3e::T56, link5.model.transform);
+        shoulder.model.transform = MatrixMultiply(UR3e::TB1, base.model.transform);
+        upperarm.model.transform = MatrixMultiply(UR3e::T12, shoulder.model.transform);
+        forearm.model.transform = MatrixMultiply(UR3e::T23, upperarm.model.transform);
+        wrist1.model.transform = MatrixMultiply(UR3e::T34, forearm.model.transform);
+        wrist2.model.transform = MatrixMultiply(UR3e::T45, wrist1.model.transform);
+        wrist3.model.transform = MatrixMultiply(UR3e::T56, wrist2.model.transform);
         break;
     case URVersion::UR5e:
         break;
@@ -42,36 +42,36 @@ UR::UR(URVersion version) :
 }
 
 void UR::update(const std::vector<float> &joint_angles) {
-    link1.model.transform =
+    shoulder.model.transform =
         MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(0)), UR3e::TB1), base.model.transform);
-    link2.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(1)), UR3e::T12), link1.model.transform);
-    link3.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(2)), UR3e::T23), link2.model.transform);
-    link4.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(3)), UR3e::T34), link3.model.transform);
-    link5.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(4)), UR3e::T45), link4.model.transform);
-    link6.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), UR3e::T56), link5.model.transform);
+    upperarm.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(1)), UR3e::T12), shoulder.model.transform);
+    forearm.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(2)), UR3e::T23), upperarm.model.transform);
+    wrist1.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(3)), UR3e::T34), forearm.model.transform);
+    wrist2.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(4)), UR3e::T45), wrist1.model.transform);
+    wrist3.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), UR3e::T56), wrist2.model.transform);
 }
 
 void UR::draw() {
     base.draw();
-    link1.draw();
-    link2.draw();
-    link3.draw();
-    link4.draw();
-    link5.draw();
-    link6.draw();
+    shoulder.draw();
+    upperarm.draw();
+    forearm.draw();
+    wrist1.draw();
+    wrist2.draw();
+    wrist3.draw();
 }
 
 void UR::draw_axes() {
     base.draw_axes();
-    link1.draw_axes();
-    link2.draw_axes();
-    link3.draw_axes();
-    link4.draw_axes();
-    link5.draw_axes();
-    link6.draw_axes();
+    shoulder.draw_axes();
+    upperarm.draw_axes();
+    forearm.draw_axes();
+    wrist1.draw_axes();
+    wrist2.draw_axes();
+    wrist3.draw_axes();
 }

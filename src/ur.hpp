@@ -20,12 +20,12 @@ class UR {
   private:
     std::filesystem::path model_dir_;
     RLModel base;
-    RLModel link1;
-    RLModel link2;
-    RLModel link3;
-    RLModel link4;
-    RLModel link5;
-    RLModel link6;
+    RLModel shoulder;
+    RLModel upperarm;
+    RLModel forearm;
+    RLModel wrist1;
+    RLModel wrist2;
+    RLModel wrist3;
 };
 
 
