@@ -1,4 +1,4 @@
-#include "utils.hpp"
+#include "rl_utils.hpp"
 #include "raymath.h"
 
 RLModel::RLModel(const char *model_path) : model(LoadModel(model_path)) {}

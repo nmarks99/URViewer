@@ -41,7 +41,7 @@ UR::UR(URVersion version) :
     }
 }
 
-void UR::update(const std::vector<double> &joint_angles) {
+void UR::update(const std::vector<float> &joint_angles) {
     link1.model.transform =
         MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(0)), UR3e::TB1), base.model.transform);
     link2.model.transform =

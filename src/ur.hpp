@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <vector>
 
-#include "utils.hpp"
+#include "rl_utils.hpp"
 #include "raymath.h"
 
 enum class URVersion {
@@ -15,7 +15,7 @@ class UR {
     UR(URVersion version);
     void draw();
     void draw_axes();
-    void update(const std::vector<double> &joint_angles);
+    void update(const std::vector<float> &joint_angles);
 
   private:
     std::filesystem::path model_dir_;
@@ -48,13 +48,13 @@ namespace UR3e {
     );
 
     const Matrix T34 = MatrixMultiply(
-        MatrixTranslate(0.0, 0.212, 0.1),
-        MatrixRotateXYZ({0.0, PI, 0.0})
+        MatrixTranslate(-0.212, 0.0, 0.1),
+        MatrixRotateXYZ({0.0, PI, -PI/2})
     );
 
     const Matrix T45 = MatrixMultiply(
         MatrixTranslate(0.0, 0.0, 0.085),
-        MatrixRotateXYZ({PI/2, 0.0, PI/2})
+        MatrixRotateXYZ({PI/2, 0.0, PI})
     );
 
     const Matrix T56 = MatrixMultiply(
