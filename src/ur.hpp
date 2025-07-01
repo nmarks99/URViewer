@@ -43,13 +43,15 @@ namespace UR3e {
     );
 
     const Matrix T23 = MatrixMultiply(
-        MatrixTranslate(0.0, 0.245, 0.09),
-        MatrixRotateXYZ({0.0, PI, 0.0})
+        MatrixTranslate(0.0, 0.245, -0.09),
+        MatrixRotateXYZ({0.0, 0.0, 0.0})
     );
 
     const Matrix T34 = MatrixMultiply(
+        // MatrixTranslate(-0.212, 0.0, 0.1),
+        // MatrixRotateXYZ({0.0, PI, -PI/2})
         MatrixTranslate(-0.212, 0.0, 0.1),
-        MatrixRotateXYZ({0.0, PI, -PI/2})
+        MatrixRotateXYZ({0.0, 0.0, -PI/2})
     );
 
     const Matrix T45 = MatrixMultiply(
