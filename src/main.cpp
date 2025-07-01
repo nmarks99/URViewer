@@ -49,17 +49,24 @@ int main(void) {
     }
     std::cout << "\n";
 
-    // Values to store joint angles in radians
-    float j1 = 0.0;
-    float j2 = 0.0;
-    float j3 = 0.0;
-    float j4 = 0.0;
-    float j5 = 0.0;
-    float j6 = 0.0;
+    // // Values to store joint angles in radians
+    // float j1 = 0.0;
+    // float j2 = 0.0;
+    // float j3 = 0.0;
+    // float j4 = 0.0;
+    // float j5 = 0.0;
+    // float j6 = 0.0;
 
     bool show_axes = false;
+    bool ask_to_quit_box = false;
+    bool exit_window = false;
 
-    while (!WindowShouldClose()) {
+    while (!exit_window) {
+
+        if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) {
+            ask_to_quit_box = !ask_to_quit_box;
+        }
+
         if (IsKeyDown(KEY_LEFT_CONTROL) or IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) {
             UpdateCamera(&camera, CAMERA_THIRD_PERSON);
         }
@@ -87,7 +94,7 @@ int main(void) {
         // GuiSlider((Rectangle){50, 80, 216, 16}, TextFormat("%0.2f", j4), NULL, &j4, -PI, PI);
         // GuiSlider((Rectangle){50, 100, 216, 16}, TextFormat("%0.2f", j5), NULL, &j5, -PI, PI);
         // GuiSlider((Rectangle){50, 120, 216, 16}, TextFormat("%0.2f", j6), NULL, &j6, -PI, PI);
-
+    
         // check box to show/hide axes
         GuiCheckBox((Rectangle){ static_cast<float>(GetScreenWidth()-100.0), 20, 15, 15 }, "Show axes", &show_axes);
 
@@ -105,6 +112,21 @@ int main(void) {
 
         EndMode3D();
         // 3D -------------
+
+        if (ask_to_quit_box) {
+            DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));
+            int result = GuiMessageBox(
+                (Rectangle){ (float)GetScreenWidth()/2 - 125, (float)GetScreenHeight()/2 - 50, 250, 100 },
+                GuiIconText(ICON_EXIT, "Close Window"),
+                "Do you really want to exit?", "Yes;No");
+            if ((result == 0) || (result == 2)) {
+                std::cout << "result == 0 or 2" << std::endl;
+                ask_to_quit_box = false;
+            } else if (result == 1) {
+                std::cout << "result == 1" << std::endl;
+                exit_window = true;
+            }
+        }
 
         EndDrawing();
         // DRAW /////////////////////////////////
