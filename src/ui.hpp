@@ -1,17 +1,17 @@
 #pragma once
-#include "ur.hpp"
-#include <array>
+#include <vector>
 
 struct UIFlags {
     bool show_axes = false;
     int axes_mask = 0;
-    // std::array<bool, UR_NUM_AXES> axes_mask_arr;
+    int wires_mask = 0;
 };
 
 class MenuPanel {
   public:
     MenuPanel();
     void update();
+    void update(const std::vector<float> &joint_angles);
     void draw();
 
     UIFlags flags;
@@ -21,5 +21,5 @@ class MenuPanel {
     float screen_height_;
     float x_;
     float y_;
-    bool visible_ = true;
+    std::vector<float> qvec_{6, 0.0};
 };

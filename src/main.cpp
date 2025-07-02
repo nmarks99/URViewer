@@ -36,7 +36,7 @@ int main(void) {
     ur_comm.connect("164.54.104.148");
 
     // vector to store joint angles
-    std::vector<float> qvec(6);
+    std::vector<float> joint_angles(6);
 
     // UI
     MenuPanel menu;
@@ -61,11 +61,11 @@ int main(void) {
 
         // get joint angles from robot
         if (ur_comm.connected()) {
-            qvec = ur_comm.get_joint_angles();
-            robot.update(qvec);
+            joint_angles = ur_comm.get_joint_angles();
+            robot.update(joint_angles);
         }
 
-        menu.update();
+        menu.update(joint_angles);
         // UPDATE ///////////////////////////////////////////////
 
 
@@ -76,8 +76,7 @@ int main(void) {
         // 3D ---------------------------------------------------
         BeginMode3D(camera);
 
-        robot.draw();
-
+        robot.draw(menu.flags.wires_mask);
         robot.draw_axes(menu.flags.axes_mask);
         // draw_axes_3d(0.01, MatrixIdentity());
 

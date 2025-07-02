@@ -6,8 +6,9 @@
 #include "raymath.h"
 
 constexpr int UR_NUM_AXES = 6;
+constexpr int UR_NUM_MODELS = UR_NUM_AXES + 1; // 6 axes/links plus base
 
-constexpr std::array<std::string_view, UR_NUM_AXES+1> UR_MODEL_LABELS = {
+constexpr std::array<std::string_view, UR_NUM_MODELS> UR_MODEL_LABELS = {
     "Base",
     "Shoulder",
     "Upperarm",
@@ -26,9 +27,9 @@ class UR {
   public:
     UR(URVersion version);
     void draw();
+    void draw(int mask);
     void draw_axes();
     void draw_axes(int mask);
-    // void draw_axes(const std::array<bool, UR_NUM_AXES> &mask);
     void update(const std::vector<float> &joint_angles);
     
     // used to "index" the joints

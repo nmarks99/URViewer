@@ -66,7 +66,18 @@ void UR::draw() {
     wrist3_.draw();
 }
 
+void UR::draw(int mask) {
+    for (int i = 0; i < UR_NUM_MODELS; i++) {
+        if (mask & (1 << i)) {
+            this->at(i).draw_wires();
+        } else {
+            this->at(i).draw();
+        }
+    }
+}
+
 void UR::draw_axes() {
+    base_.draw_axes();
     shoulder_.draw_axes();
     upperarm_.draw_axes();
     forearm_.draw_axes();
@@ -76,36 +87,30 @@ void UR::draw_axes() {
 }
 
 void UR::draw_axes(int mask) {
-    for (int i = 0; i < UR_NUM_AXES; i++) {
+    for (int i = 0; i < UR_NUM_MODELS; i++) {
         if (mask & (1 << i)) {
             this->at(i).draw_axes();
         }
     }
 }
-// void UR::draw_axes(const std::array<bool, UR_NUM_AXES> &mask) {
-    // for (int i = 0; i < UR_NUM_AXES; i++) {
-        // if (mask.at(i)) {
-            // this->at(i).draw_axes();
-        // }
-    // }
-// }
 
 RLModel& UR::at(int i) {
     switch (i) {
         case 0:
-            return shoulder_;
+            return base_;
         case 1:
-            return upperarm_;
+            return shoulder_;
         case 2:
-            return forearm_;
+            return upperarm_;
         case 3:
-            return wrist1_;
+            return forearm_;
         case 4:
-            return wrist2_;
+            return wrist1_;
         case 5:
+            return wrist2_;
+        case 6:
             return wrist3_;
         default:
             throw std::out_of_range("Index must be 0 to 5");
     }
 }
-
