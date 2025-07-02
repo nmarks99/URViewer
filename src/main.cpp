@@ -39,7 +39,7 @@ int main(void) {
     std::vector<float> qvec(6);
 
     // UI
-    MenuPanel menu(GetScreenWidth(), GetScreenHeight());
+    MenuPanel menu;
 
     // bool show_axes = false;
     bool ask_to_quit_box = false;
@@ -78,10 +78,8 @@ int main(void) {
 
         robot.draw();
 
-        if (menu.flags.show_axes) {
-            robot.draw_axes(0b101010);
-            draw_axes_3d(0.01, MatrixIdentity());
-        }
+        robot.draw_axes(menu.flags.axes_mask_arr);
+        // draw_axes_3d(0.01, MatrixIdentity());
 
         DrawGrid(10, 0.25f);
 

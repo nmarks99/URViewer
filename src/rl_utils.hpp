@@ -3,11 +3,12 @@
 #include <filesystem>
 
 struct RLModel {
-  public:
     Model model;
 
     RLModel(const char *model_path);
     RLModel(std::filesystem::path model_path);
+    RLModel(const char *model_path, const std::string &name);
+    RLModel(std::filesystem::path model_path, const std::string &name);
     ~RLModel();
 
     // delete copy constructor and copy assignment operator
@@ -17,6 +18,8 @@ struct RLModel {
     void draw();
     void draw_wires();
     void draw_axes();
+  
+    std::string name = "";
 };
 
 struct RLWindow {

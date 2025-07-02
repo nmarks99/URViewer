@@ -5,7 +5,17 @@
 #include "rl_utils.hpp"
 #include "raymath.h"
 
-constexpr int UR_NUMBER_OF_AXES = 6;
+constexpr int UR_NUM_AXES = 6;
+
+constexpr std::array<std::string_view, UR_NUM_AXES+1> UR_MODEL_LABELS = {
+    "Base",
+    "Shoulder",
+    "Upperarm",
+    "Forearm",
+    "Wrist1",
+    "Wrist2",
+    "Wrist3",
+};
 
 enum class URVersion {
     UR3e,
@@ -17,21 +27,21 @@ class UR {
     UR(URVersion version);
     void draw();
     void draw_axes();
-    void draw_axes(int mask);
+    void draw_axes(const std::array<bool, UR_NUM_AXES> &mask);
     void update(const std::vector<float> &joint_angles);
+    
+    // used to "index" the joints
+    RLModel& at(int index);
 
   private:
     std::filesystem::path model_dir_;
-    RLModel base;
-    RLModel shoulder;
-    RLModel upperarm;
-    RLModel forearm;
-    RLModel wrist1;
-    RLModel wrist2;
-    RLModel wrist3;
-
-    // used to "index" the joints
-    RLModel& at(int index);
+    RLModel base_;
+    RLModel shoulder_;
+    RLModel upperarm_;
+    RLModel forearm_;
+    RLModel wrist1_;
+    RLModel wrist2_;
+    RLModel wrist3_;
 };
 
 
