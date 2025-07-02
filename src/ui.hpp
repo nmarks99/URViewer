@@ -4,8 +4,8 @@
 
 struct UIFlags {
     bool show_axes = false;
-    int show_axes_mask = false;
-    std::array<bool, UR_NUM_AXES> axes_mask_arr;
+    int axes_mask = 0;
+    // std::array<bool, UR_NUM_AXES> axes_mask_arr;
 };
 
 class MenuPanel {

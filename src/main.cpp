@@ -78,7 +78,7 @@ int main(void) {
 
         robot.draw();
 
-        robot.draw_axes(menu.flags.axes_mask_arr);
+        robot.draw_axes(menu.flags.axes_mask);
         // draw_axes_3d(0.01, MatrixIdentity());
 
         DrawGrid(10, 0.25f);

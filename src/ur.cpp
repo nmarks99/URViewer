@@ -75,20 +75,20 @@ void UR::draw_axes() {
     wrist3_.draw_axes();
 }
 
-// void UR::draw_axes(int mask) {
-    // for (int i = 0; i < UR_NUM_AXES; i++) {
-        // if (mask & (1 << i)) {
-            // this->at(i).draw_axes();
-        // }
-    // }
-// }
-void UR::draw_axes(const std::array<bool, UR_NUM_AXES> &mask) {
+void UR::draw_axes(int mask) {
     for (int i = 0; i < UR_NUM_AXES; i++) {
-        if (mask.at(i)) {
+        if (mask & (1 << i)) {
             this->at(i).draw_axes();
         }
     }
 }
+// void UR::draw_axes(const std::array<bool, UR_NUM_AXES> &mask) {
+    // for (int i = 0; i < UR_NUM_AXES; i++) {
+        // if (mask.at(i)) {
+            // this->at(i).draw_axes();
+        // }
+    // }
+// }
 
 RLModel& UR::at(int i) {
     switch (i) {

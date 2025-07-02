@@ -27,7 +27,8 @@ class UR {
     UR(URVersion version);
     void draw();
     void draw_axes();
-    void draw_axes(const std::array<bool, UR_NUM_AXES> &mask);
+    void draw_axes(int mask);
+    // void draw_axes(const std::array<bool, UR_NUM_AXES> &mask);
     void update(const std::vector<float> &joint_angles);
     
     // used to "index" the joints
