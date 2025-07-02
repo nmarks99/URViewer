@@ -3,15 +3,14 @@
 #include "ui.hpp"
 #include "ur.hpp"
 
-constexpr int MENU_WIDTH = 300;
+constexpr int MENU_WIDTH = 400;
 
 MenuPanel::MenuPanel() 
     : screen_width_(GetScreenWidth()),
     screen_height_(GetScreenHeight()),
     x_(screen_width_ - MENU_WIDTH),
     y_(0.0)
-{
-}
+{}
 
 void MenuPanel::update() {
     screen_width_ = static_cast<float>(GetScreenWidth());
@@ -22,6 +21,9 @@ void MenuPanel::update() {
 
 void MenuPanel::update(const std::vector<float> &joint_angles) {
     qvec_ = joint_angles;
+    for (float &v : qvec_) {
+        v *= RAD2DEG;
+    }
     screen_width_ = static_cast<float>(GetScreenWidth());
     screen_height_ = static_cast<float>(GetScreenHeight());
     x_ = static_cast<float>(screen_width_-MENU_WIDTH);
@@ -43,55 +45,71 @@ void MenuPanel::draw() {
 
     // axes check box labels
     GuiLabel(Rectangle{
-        .x = x_+95,
-        .y = y_+20,
+        .x = x_+225,
+        .y = y_+30,
         .width = 100,
         .height = 30,
     }, "Axes");
 
     // wires check box labels
     GuiLabel(Rectangle{
-        .x = x_+150,
-        .y = y_+20,
+        .x = x_+285,
+        .y = y_+30,
         .width = 100,
         .height = 30,
     }, "Wires");
 
-    // model names labels column
-    for (int i = 0; i < UR_NUM_MODELS; i++) {
+    // Draw each row of the menu panel
+    static const float row_offset = 30;
+    static const float top_offset = 60;
+    for (int row = 0; row < UR_NUM_MODELS; row++) {
+        // Model label
         GuiLabel(Rectangle{
             .x = x_+10,
-            .y = y_+40+float(20.0*i),
+            .y = y_+top_offset+float(row_offset*row),
             .width = 100,
             .height = 30,
-        }, UR_MODEL_LABELS.at(i).data());
-    }
+        }, UR_MODEL_LABELS.at(row).data());
 
-    // check boxes for toggling model coordinate axes
-    for (int i = 0; i < UR_NUM_MODELS; i++) {
-        bool checked = (flags.axes_mask >> i) & 1;
+
+        // Joint angle (first model is base)
+        GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(DARKBLUE));
+        if (row > 0) {
+            std::ostringstream oss;
+            oss.precision(2);
+            oss << std::fixed << qvec_.at(row - 1);
+            GuiLabel(Rectangle{
+                .x = x_+140,
+                .y = y_+top_offset+float(row_offset*row),
+                .width = 100,
+                .height = 30,
+            }, oss.str().c_str());
+        }
+        GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(BLACK));
+
+        // check box to toggle coordinate axis
+        bool checked_axis = (flags.axes_mask >> row) & 1;
         if (GuiCheckBox(
             Rectangle {
-                .x = x_+100,
-                .y = y_+46+float(20.0*i),
+                .x = x_+240,
+                .y = y_+(top_offset+row_offset-22)+float(row_offset*row),
                 .width = 15,
                 .height = 15
-            }, "", &checked)) {
-            checked ? flags.axes_mask |= (1 << i) : flags.axes_mask &= ~(1 << i);
+            }, "", &checked_axis)) {
+            checked_axis ? flags.axes_mask |= (1 << row) : flags.axes_mask &= ~(1 << row);
         }
-    }
 
-    // check boxes for toggling drawing in wireframe mode
-    for (int i = 0; i < UR_NUM_MODELS; i++) {
-        bool checked = (flags.wires_mask >> i) & 1;
+        // check box to toggle wireframe drawing mode
+        bool checked_wire = (flags.wires_mask >> row) & 1;
         if (GuiCheckBox(
             Rectangle {
-                .x = x_+150,
-                .y = y_+46+float(20.0*i),
+                .x = x_+305,
+                .y = y_+(top_offset+row_offset-22)+float(row_offset*row),
                 .width = 15,
                 .height = 15
-            }, "", &checked)) {
-            checked ? flags.wires_mask |= (1 << i) : flags.wires_mask &= ~(1 << i);
+            }, "", &checked_wire)) {
+            checked_wire ? flags.wires_mask |= (1 << row) : flags.wires_mask &= ~(1 << row);
         }
+
     }
 }

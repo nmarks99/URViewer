@@ -2,7 +2,7 @@
 
 std::string get_model_dir(URVersion version) {
     // cmake defines the URVIEWER_MODEL_DIR macro
-    std::filesystem::path model_dir = URVIEWER_MODEL_DIR;
+    std::filesystem::path model_dir = URVIEWER_RESOURCE_DIR;
 
     switch (version) {
     case URVersion::UR3e:

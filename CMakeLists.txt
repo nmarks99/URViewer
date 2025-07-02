@@ -22,8 +22,8 @@ if(ur_rtde_FOUND)
     message(STATUS "ur_rtde DIR: ${ur_rtde_DIR}")
 endif()
 
-# Define a preprocessor macro for the model directory
-add_compile_definitions(URVIEWER_MODEL_DIR="${CMAKE_CURRENT_SOURCE_DIR}/models")
+# Define a preprocessor macro for the resources directory
+add_compile_definitions(URVIEWER_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources")
 
 #####################################################
 add_executable(URViewer

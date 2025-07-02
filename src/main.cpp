@@ -18,7 +18,10 @@ int main(void) {
     SetTargetFPS(60);
     RLWindow window(1000, 800, "UR Robot Viewer");
     
-    // GuiSetStyle(DEFAULT, TEXT_SIZE, 18);
+    std::filesystem::path resource_dir = URVIEWER_RESOURCE_DIR;
+    Font font = LoadFontEx((resource_dir / "fonts/JetBrainsMonoNerdFont-Regular.ttf").c_str(), 24, 0, 0);
+    GuiSetFont(font);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
 
     // Define the camera to look into our 3d world
     Camera camera = {0};
@@ -78,7 +81,7 @@ int main(void) {
 
         robot.draw(menu.flags.wires_mask);
         robot.draw_axes(menu.flags.axes_mask);
-        // draw_axes_3d(0.01, MatrixIdentity());
+        draw_axes_3d(0.01, MatrixIdentity());
 
         DrawGrid(10, 0.25f);
 
@@ -90,7 +93,7 @@ int main(void) {
         if (ask_to_quit_box) {
             DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));
             int result = GuiMessageBox(
-                (Rectangle){ (float)GetScreenWidth()/2 - 125, (float)GetScreenHeight()/2 - 50, 250, 100 },
+                (Rectangle){ (float)GetScreenWidth()/2 - 225, (float)GetScreenHeight()/2 - 100, 450, 200 },
                 GuiIconText(ICON_EXIT, "Close Window"),
                 "Do you really want to exit?", "Yes;No");
             if ((result == 0) || (result == 2)) {
