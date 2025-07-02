@@ -1,23 +1,38 @@
 #include "comm.hpp"
 
-URRtdeSource::URRtdeSource() : recv_(nullptr) {
+URRtdeComm::URRtdeComm() : recv_(nullptr) {
 }
 
-URRtdeSource::~URRtdeSource() {
+URRtdeComm::~URRtdeComm() {
     if (recv_) {
         recv_->disconnect();
     }
 }
 
-void URRtdeSource::connect(const std::string &robot_ip) {
+bool URRtdeComm::connect(const std::string &robot_ip) {
+    bool connected = false;
     try {
         recv_ = std::make_unique<ur_rtde::RTDEReceiveInterface>(robot_ip);
+        if (recv_) {
+            if (recv_->isConnected()) {
+                connected = true;
+            }
+        }
+        return true;
     } catch (const std::exception &e) {
         std::cout << e.what() << std::endl;
+        connected = false;
+    }
+    return connected;
+}
+
+void URRtdeComm::disconnect() {
+    if (recv_) {
+        recv_->disconnect();
     }
 }
 
-bool URRtdeSource::connected() {
+bool URRtdeComm::connected() {
     if (recv_) {
         return recv_->isConnected();
     } else {
@@ -25,7 +40,7 @@ bool URRtdeSource::connected() {
     }
 }
 
-std::vector<float> URRtdeSource::get_joint_angles() {
+std::vector<float> URRtdeComm::get_joint_angles() {
     std::vector<double> qvec_double(6);
     std::vector<float> qvec_float(6);
     if (recv_) {

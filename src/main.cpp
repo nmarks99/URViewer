@@ -8,7 +8,10 @@
 #include "rl_utils.hpp"
 #include "ur.hpp"
 #include "ui.hpp"
+#include "i_comm.hpp"
 #include "comm.hpp"
+
+std::unique_ptr<IURCommunication> ur_comm;
 
 int main(void) {
 
@@ -34,9 +37,9 @@ int main(void) {
     // Load models and apply initial transforms
     UR robot(URVersion::UR3e);
 
-    // Connection to the robot
-    URRtdeSource ur_comm;
-    ur_comm.connect("164.54.104.148");
+    // // Connection to the robot
+    ur_comm = std::make_unique<URRtdeComm>();
+    ur_comm->connect("164.54.104.148");
 
     // vector to store joint angles
     std::vector<float> joint_angles(6);
@@ -63,8 +66,8 @@ int main(void) {
         }
 
         // get joint angles from robot
-        if (ur_comm.connected()) {
-            joint_angles = ur_comm.get_joint_angles();
+        if (ur_comm->connected()) {
+            joint_angles = ur_comm->get_joint_angles();
             robot.update(joint_angles);
         }
 
