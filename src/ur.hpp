@@ -5,6 +5,8 @@
 #include "rl_utils.hpp"
 #include "raymath.h"
 
+constexpr int UR_NUMBER_OF_AXES = 6;
+
 enum class URVersion {
     UR3e,
     UR5e, // TODO: support this
@@ -15,6 +17,7 @@ class UR {
     UR(URVersion version);
     void draw();
     void draw_axes();
+    void draw_axes(int mask);
     void update(const std::vector<float> &joint_angles);
 
   private:
@@ -26,6 +29,9 @@ class UR {
     RLModel wrist1;
     RLModel wrist2;
     RLModel wrist3;
+
+    // used to "index" the joints
+    RLModel& at(int index);
 };
 
 

@@ -1,5 +1,4 @@
 #include <string>
-#include <algorithm>
 
 #include "raylib.h"
 #include "raymath.h"
@@ -8,6 +7,7 @@
 
 #include "rl_utils.hpp"
 #include "ur.hpp"
+#include "ui.hpp"
 #include "comm.hpp"
 
 int main(void) {
@@ -16,7 +16,7 @@ int main(void) {
     SetTraceLogLevel(LOG_FATAL);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
-    RLWindow window(800, 800, "UR Robot Viewer");
+    RLWindow window(1000, 800, "UR Robot Viewer");
     
     // GuiSetStyle(DEFAULT, TEXT_SIZE, 18);
 
@@ -29,7 +29,7 @@ int main(void) {
     camera.projection = CAMERA_PERSPECTIVE;      // Camera mode type
 
     // Load models and apply initial transforms
-    auto robot = UR(URVersion::UR3e);
+    UR robot(URVersion::UR3e);
 
     // Connection to the robot
     URRtdeSource ur_comm;
@@ -38,11 +38,12 @@ int main(void) {
     // vector to store joint angles
     std::vector<float> qvec(6);
 
-    bool show_axes = false;
+    // UI
+    MenuPanel menu(GetScreenWidth(), GetScreenHeight());
+
+    // bool show_axes = false;
     bool ask_to_quit_box = false;
     bool exit_window = false;
-    bool show_settings = true;
-    bool try_connecting = true;
     std::string ip_addr_str(100, '\0');
 
     while (!exit_window) {
@@ -63,23 +64,22 @@ int main(void) {
             qvec = ur_comm.get_joint_angles();
             robot.update(qvec);
         }
+
+        menu.update();
         // UPDATE ///////////////////////////////////////////////
 
 
         // DRAW /////////////////////////////////////////////////
         BeginDrawing();
         ClearBackground(RAYWHITE);
-    
-        // check box to show/hide axes
-        GuiCheckBox((Rectangle){ static_cast<float>(GetScreenWidth()-100.0), 20, 15, 15 }, "Show axes", &show_axes);
 
         // 3D ---------------------------------------------------
         BeginMode3D(camera);
 
         robot.draw();
 
-        if (show_axes) {
-            robot.draw_axes();
+        if (menu.flags.show_axes) {
+            robot.draw_axes(0b101010);
             draw_axes_3d(0.01, MatrixIdentity());
         }
 
@@ -87,6 +87,8 @@ int main(void) {
 
         EndMode3D();
         // 3D ---------------------------------------------------
+        
+        menu.draw();
 
         if (ask_to_quit_box) {
             DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));

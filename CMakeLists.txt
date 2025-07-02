@@ -30,6 +30,7 @@ add_executable(URViewer
     src/main.cpp
     src/rl_utils.cpp
     src/ur.cpp
+    src/ui.cpp
     src/comm.cpp
 )
 

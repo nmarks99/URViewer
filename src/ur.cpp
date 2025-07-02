@@ -41,6 +41,25 @@ UR::UR(URVersion version) :
     }
 }
 
+RLModel& UR::at(int i) {
+    switch (i) {
+        case 0:
+            return this->base;
+        case 1:
+            return this->shoulder;
+        case 2:
+            return this->upperarm;
+        case 3:
+            return this->wrist1;
+        case 4:
+            return this->wrist2;
+        case 5:
+            return this->wrist3;
+        default:
+            throw std::out_of_range("index must be in range 0 to 5");
+    }
+}
+
 void UR::update(const std::vector<float> &joint_angles) {
     shoulder.model.transform =
         MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(0)), UR3e::TB1), base.model.transform);
@@ -74,4 +93,12 @@ void UR::draw_axes() {
     wrist1.draw_axes();
     wrist2.draw_axes();
     wrist3.draw_axes();
+}
+
+void UR::draw_axes(int mask) {
+    for (int i = 0; i < UR_NUMBER_OF_AXES; i++) {
+        if (mask & (1 << i)) {
+            this->at(i).draw_axes();
+        }
+    }
 }
