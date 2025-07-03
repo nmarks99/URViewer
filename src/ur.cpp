@@ -23,7 +23,8 @@ UR::UR(URVersion version) :
     forearm_(model_dir_ / "forearm.obj", UR_MODEL_LABELS.at(3).data()),
     wrist1_(model_dir_ / "wrist1.obj", UR_MODEL_LABELS.at(4).data()),
     wrist2_(model_dir_ / "wrist2.obj", UR_MODEL_LABELS.at(5).data()),
-    wrist3_(model_dir_ / "wrist3.obj", UR_MODEL_LABELS.at(6).data())
+    wrist3_(model_dir_ / "wrist3.obj", UR_MODEL_LABELS.at(6).data()),
+    tool_(model_dir_ / "../robotiq-hand-e.obj", UR_MODEL_LABELS.at(7).data())
 {
 
     switch (version) {
@@ -35,6 +36,7 @@ UR::UR(URVersion version) :
         wrist1_.model.transform = MatrixMultiply(UR3e::T34, forearm_.model.transform);
         wrist2_.model.transform = MatrixMultiply(UR3e::T45, wrist1_.model.transform);
         wrist3_.model.transform = MatrixMultiply(UR3e::T56, wrist2_.model.transform);
+        tool_.model.transform = MatrixMultiply(UR3e::T6TOOL, wrist3_.model.transform);
         break;
     case URVersion::UR5e:
         break;
@@ -54,6 +56,8 @@ void UR::update(const std::vector<float> &joint_angles) {
         MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(4)), UR3e::T45), wrist1_.model.transform);
     wrist3_.model.transform =
         MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), UR3e::T56), wrist2_.model.transform);
+    tool_.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), UR3e::T6TOOL), wrist3_.model.transform);
 }
 
 void UR::draw() {
@@ -64,6 +68,7 @@ void UR::draw() {
     wrist1_.draw();
     wrist2_.draw();
     wrist3_.draw();
+    tool_.draw();
 }
 
 void UR::draw(int mask, bool opaque) {
@@ -88,6 +93,7 @@ void UR::draw_axes() {
     wrist1_.draw_axes();
     wrist2_.draw_axes();
     wrist3_.draw_axes();
+    tool_.draw_axes();
 }
 
 void UR::draw_axes(int mask) {
@@ -114,7 +120,9 @@ RLModel& UR::at(int i) {
             return wrist2_;
         case 6:
             return wrist3_;
+        case 7:
+            return tool_;
         default:
-            throw std::out_of_range("Index must be 0 to 5");
+            throw std::out_of_range("Index must be 0 to 7");
     }
 }

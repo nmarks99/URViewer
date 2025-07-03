@@ -4,7 +4,7 @@
 #include "ur.hpp"
 
 constexpr int MENU_WIDTH = 400;
-constexpr int MENU_HEIGHT = 400;
+constexpr int MENU_HEIGHT = 450;
 
 Ui::Ui() 
     : screen_width_(GetScreenWidth()),
@@ -116,7 +116,7 @@ void Ui::draw() {
 
         // Joint angle (first model is base)
         GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(DARKBLUE));
-        if (row > 0) {
+        if (row > 0 and row <= 6) {
             std::ostringstream oss;
             oss.precision(2);
             oss << std::fixed << qvec_.at(row - 1);

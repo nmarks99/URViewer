@@ -9,7 +9,7 @@ struct UIState {
     int axes_mask = 0;
     int wires_mask = 0;
 
-    char conn_string[128] = "127.0.0.1";
+    char conn_string[128] = "164.54.104.148";
     bool conn_text_edit_mode = false;
     bool connect_called = false;
     bool disconnect_called = false;
