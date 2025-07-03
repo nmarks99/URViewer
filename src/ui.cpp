@@ -13,13 +13,6 @@ Ui::Ui()
     y_(0.0)
 {}
 
-// void Ui::update() {
-    // screen_width_ = static_cast<float>(GetScreenWidth());
-    // screen_height_ = static_cast<float>(GetScreenHeight());
-    // x_ = static_cast<float>(screen_width_-MENU_WIDTH);
-    // y_ = 0.0;
-// }
-
 void Ui::update(const RobotState &robot_state) {
     connected_ = robot_state.connected;
     qvec_ = robot_state.joint_angles;

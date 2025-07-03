@@ -27,7 +27,7 @@ class UR {
   public:
     UR(URVersion version);
     void draw();
-    void draw(int mask);
+    void draw(int mask, bool opaque = false);
     void draw_axes();
     void draw_axes(int mask);
     void update(const std::vector<float> &joint_angles);
@@ -66,8 +66,6 @@ namespace UR3e {
     );
 
     const Matrix T34 = MatrixMultiply(
-        // MatrixTranslate(-0.212, 0.0, 0.1),
-        // MatrixRotateXYZ({0.0, PI, -PI/2})
         MatrixTranslate(-0.212, 0.0, 0.1),
         MatrixRotateXYZ({0.0, 0.0, -PI/2})
     );

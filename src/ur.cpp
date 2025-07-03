@@ -66,12 +66,16 @@ void UR::draw() {
     wrist3_.draw();
 }
 
-void UR::draw(int mask) {
+void UR::draw(int mask, bool opaque) {
     for (int i = 0; i < UR_NUM_MODELS; i++) {
         if (mask & (1 << i)) {
             this->at(i).draw_wires();
         } else {
-            this->at(i).draw();
+            if (opaque) {
+                this->at(i).draw(ColorAlpha(WHITE, 0.5));
+            } else {
+                this->at(i).draw();
+            }
         }
     }
 }

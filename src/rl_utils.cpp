@@ -18,7 +18,13 @@ RLModel::~RLModel() {
     }
 }
 
-void RLModel::draw() { DrawModel(model, Vector3Zeros, 1.0, WHITE); }
+void RLModel::draw() {
+    DrawModel(model, Vector3Zeros, 1.0, WHITE); 
+}
+
+void RLModel::draw(Color color) {
+    DrawModel(model, Vector3Zeros, 1.0, color); 
+}
 
 void RLModel::draw_wires() { DrawModelWires(model, Vector3Zeros, 1.0, WHITE); }
 

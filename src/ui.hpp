@@ -21,8 +21,6 @@ struct UIState {
 class Ui {
   public:
     Ui();
-    void update();
-    // void update(const std::vector<float> &joint_angles);
     void update(const RobotState &robot_state);
     void draw();
 

@@ -16,6 +16,7 @@ struct RLModel {
     RLModel &operator=(const RLModel &) = delete;
 
     void draw();
+    void draw(Color color);
     void draw_wires();
     void draw_axes();
   

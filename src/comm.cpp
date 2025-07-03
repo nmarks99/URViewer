@@ -40,18 +40,6 @@ bool URRtdeComm::connected() {
     }
 }
 
-// std::vector<float> URRtdeComm::get_joint_angles() {
-    // std::vector<double> qvec_double(6);
-    // std::vector<float> qvec_float(6);
-    // if (recv_) {
-        // qvec_double = recv_->getActualQ();
-        // for (int i = 0; i < qvec_double.size(); i++) {
-            // qvec_float.at(i) = static_cast<float>(qvec_double.at(i));
-        // }
-    // }
-    // return qvec_float;
-// }
-
 RobotState URRtdeComm::get_robot_state() {
     std::vector<double> qvec_double(6);
     std::vector<float> qvec_float(6);

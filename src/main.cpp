@@ -37,13 +37,14 @@ int main(void) {
     UR robot_model(URVersion::UR3e);
 
     // Connection to the robot
+    // TODO: support EPICS backend
     ur_comm = std::make_unique<URRtdeComm>();
-
-    // Used to store data from the robot
-    RobotState robot_state;
 
     // For rendering the UI and keeping track of its state
     Ui ui;
+
+    // Used to store data from the robot
+    RobotState robot_state;
 
     while (!ui.state.exit_window) {
 
@@ -85,7 +86,7 @@ int main(void) {
         // 3D ---------------------------------------------------
         BeginMode3D(camera);
 
-        robot_model.draw(ui.state.wires_mask);
+        robot_model.draw(ui.state.wires_mask, !robot_state.connected);
         robot_model.draw_axes(ui.state.axes_mask);
 
         DrawGrid(10, 0.25f);
