@@ -9,7 +9,8 @@ class URRtdeComm : public IURCommunication{
     bool connect(const std::string &robot_ip);
     void disconnect();
     bool connected();
-    std::vector<float> get_joint_angles();
+    // std::vector<float> get_joint_angles();
+    RobotState get_robot_state();
 
   private:
     std::unique_ptr<ur_rtde::RTDEReceiveInterface> recv_;
