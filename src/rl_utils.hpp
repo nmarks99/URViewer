@@ -33,4 +33,11 @@ struct RLWindow {
     RLWindow &operator=(const RLWindow &) = delete;
 };
 
+struct RLCamera3D {
+    RLCamera3D();
+    void update();
+    Camera camera;
+
+};
+
 void draw_axes_3d(float thickness, Matrix transform);

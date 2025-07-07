@@ -25,13 +25,7 @@ int main(void) {
     GuiSetFont(font);
     GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
 
-    // Define the camera to look into our 3d world
-    Camera camera = {0};
-    camera.position = Vector3{-1.0f, 1.0f, -1.25f}; // Camera position
-    camera.target = Vector3{0.0f, 0.25f, 0.0f};  // Camera looking at point
-    camera.up = Vector3{0.0f, 1.0f, 0.0f};       // Camera up vector (rotation towards target)
-    camera.fovy = 45.0f;                         // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;      // Camera mode type
+    RLCamera3D cam;
 
     // Load models and apply initial transforms
     UR robot_model(URVersion::UR3e);
@@ -54,10 +48,7 @@ int main(void) {
             ui.state.ask_to_quit = !ui.state.ask_to_quit;
         }
 
-        // for adjusting the camera
-        if (IsKeyDown(KEY_LEFT_CONTROL) or IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) {
-            UpdateCamera(&camera, CAMERA_THIRD_PERSON);
-        }
+        cam.update();
 
         // get data from robot
         robot_state = ur_comm->get_robot_state();
@@ -84,7 +75,7 @@ int main(void) {
         ClearBackground(RAYWHITE);
 
         // 3D ---------------------------------------------------
-        BeginMode3D(camera);
+        BeginMode3D(cam.camera);
 
         robot_model.draw(ui.state.wires_mask, !robot_state.connected);
         robot_model.draw_axes(ui.state.axes_mask);
