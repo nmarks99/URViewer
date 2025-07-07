@@ -1,6 +1,7 @@
 #pragma once
 #include <filesystem>
 #include <vector>
+#include <array>
 
 #include "rl_utils.hpp"
 #include "raymath.h"
