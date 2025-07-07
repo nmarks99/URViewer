@@ -16,6 +16,8 @@ struct UIState {
 
     bool ask_to_quit = false;
     bool exit_window = false;
+
+    bool show_menu = true;
 };
 
 class Ui {

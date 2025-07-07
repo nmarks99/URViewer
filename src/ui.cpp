@@ -27,8 +27,34 @@ void Ui::update(const RobotState &robot_state) {
 
 void Ui::draw() {
 
+    // Ask to quit box
+    if (state.ask_to_quit) {
+        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));
+        int result = GuiMessageBox(
+            (Rectangle){ (float)GetScreenWidth()/2 - 225, (float)GetScreenHeight()/2 - 100, 450, 200 },
+            GuiIconText(ICON_EXIT, "Close Window"),
+            "Do you really want to exit?", "Yes;No");
+        if ((result == 0) || (result == 2)) {
+            state.ask_to_quit = false;
+        } else if (result == 1) {
+            state.exit_window = true;
+        }
+    }
+
+
     // Box to contain all menu elements
-    GuiPanel(Rectangle{x_, y_, MENU_WIDTH, MENU_HEIGHT}, "Menu");
+    if (state.show_menu) {
+        int res = GuiWindowBox(Rectangle{x_, y_, MENU_WIDTH, MENU_HEIGHT}, "Menu");
+        if (res) {
+            state.show_menu = false;
+        }
+    } else {
+        if (GuiButton((Rectangle){ screen_width_-135, 10, 125, 30 }, GuiIconText(ICON_GEAR, "Settings"))) {
+            state.show_menu = true;
+        }
+        return;
+    }
+
 
     // ------------------------------------------------------------------
     // Connection 
@@ -116,12 +142,17 @@ void Ui::draw() {
 
         // Joint angle (first model is base)
         GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(DARKBLUE));
-        if (row > 0 and row <= 6) {
+        if (row > 0 and row <= UR_NUM_AXES) {
             std::ostringstream oss;
             oss.precision(2);
-            oss << std::fixed << qvec_.at(row - 1);
+            oss << std::fixed;
+            const float val = qvec_.at(row-1);
+            if (val > 0) {
+                oss << " ";
+            }
+            oss << val << "";
             GuiLabel(Rectangle{
-                .x = x_+150,
+                .x = x_+140,
                 .y = y_+top_offset+float(row_offset*row),
                 .width = 100,
                 .height = 30,
@@ -151,24 +182,6 @@ void Ui::draw() {
                 .height = 15
             }, "", &checked_wire)) {
             checked_wire ? state.wires_mask |= (1 << row) : state.wires_mask &= ~(1 << row);
-        }
-    }
-   
-
-    // ------------------------------------------------------------------
-    // Ask to quit box
-    // ------------------------------------------------------------------
-
-    if (state.ask_to_quit) {
-        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));
-        int result = GuiMessageBox(
-            (Rectangle){ (float)GetScreenWidth()/2 - 225, (float)GetScreenHeight()/2 - 100, 450, 200 },
-            GuiIconText(ICON_EXIT, "Close Window"),
-            "Do you really want to exit?", "Yes;No");
-        if ((result == 0) || (result == 2)) {
-            state.ask_to_quit = false;
-        } else if (result == 1) {
-            state.exit_window = true;
         }
     }
 }

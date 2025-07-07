@@ -19,9 +19,16 @@ int main(void) {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
     RLWindow window(1400, 950, "UR Robot Viewer");
-    
+
+    std::vector<int> codepoints_vec;
+    for (int i = 32; i <= 126; ++i)
+    {
+        codepoints_vec.push_back(i);
+    }
+    codepoints_vec.push_back(0xE33E); // degree symbol
+
     std::filesystem::path resource_dir = URVIEWER_RESOURCE_DIR;
-    Font font = LoadFontEx((resource_dir / "fonts/JetBrainsMonoNerdFont-Regular.ttf").c_str(), 24, 0, 0);
+    Font font = LoadFontEx((resource_dir / "fonts/JetBrainsMonoNerdFont-Regular.ttf").c_str(), 24, codepoints_vec.data(), codepoints_vec.size());
     GuiSetFont(font);
     GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
 
