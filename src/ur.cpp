@@ -56,8 +56,7 @@ void UR::update(const std::vector<float> &joint_angles) {
         MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(4)), UR3e::T45), wrist1_.model.transform);
     wrist3_.model.transform =
         MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), UR3e::T56), wrist2_.model.transform);
-    tool_.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), UR3e::T6TOOL), wrist3_.model.transform);
+    tool_.model.transform = MatrixMultiply(UR3e::T6TOOL, wrist3_.model.transform);
 }
 
 void UR::draw() {
