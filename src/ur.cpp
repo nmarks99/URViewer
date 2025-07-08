@@ -17,6 +17,7 @@ std::string get_model_dir(URVersion version) {
 
 UR::UR(URVersion version) :
     model_dir_(get_model_dir(version)),
+    version_(version),
     base_(model_dir_ / "base.obj", UR_MODEL_LABELS.at(0).data()),
     shoulder_(model_dir_ / "shoulder.obj", UR_MODEL_LABELS.at(1).data()),
     upperarm_(model_dir_ / "upperarm.obj", UR_MODEL_LABELS.at(2).data()),
@@ -39,24 +40,51 @@ UR::UR(URVersion version) :
         tool_.model.transform = MatrixMultiply(UR3e::T6TOOL, wrist3_.model.transform);
         break;
     case URVersion::UR5e:
+        base_.model.transform = UR5e::TSBASE;
+        shoulder_.model.transform = MatrixMultiply(UR5e::TB1, base_.model.transform);
+        upperarm_.model.transform = MatrixMultiply(UR5e::T12, shoulder_.model.transform);
+        forearm_.model.transform = MatrixMultiply(UR5e::T23, upperarm_.model.transform);
+        wrist1_.model.transform = MatrixMultiply(UR5e::T34, forearm_.model.transform);
+        wrist2_.model.transform = MatrixMultiply(UR5e::T45, wrist1_.model.transform);
+        wrist3_.model.transform = MatrixMultiply(UR5e::T56, wrist2_.model.transform);
+        tool_.model.transform = MatrixMultiply(UR5e::T6TOOL, wrist3_.model.transform);
         break;
     }
 }
 
 void UR::update(const std::vector<float> &joint_angles) {
-    shoulder_.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(0)), UR3e::TB1), base_.model.transform);
-    upperarm_.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(1)), UR3e::T12), shoulder_.model.transform);
-    forearm_.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(2)), UR3e::T23), upperarm_.model.transform);
-    wrist1_.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(3)), UR3e::T34), forearm_.model.transform);
-    wrist2_.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(4)), UR3e::T45), wrist1_.model.transform);
-    wrist3_.model.transform =
-        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), UR3e::T56), wrist2_.model.transform);
-    tool_.model.transform = MatrixMultiply(UR3e::T6TOOL, wrist3_.model.transform);
+    switch (version_) {
+        case URVersion::UR3e:
+            shoulder_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(0)), UR3e::TB1), base_.model.transform);
+            upperarm_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(1)), UR3e::T12), shoulder_.model.transform);
+            forearm_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(2)), UR3e::T23), upperarm_.model.transform);
+            wrist1_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(3)), UR3e::T34), forearm_.model.transform);
+            wrist2_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(4)), UR3e::T45), wrist1_.model.transform);
+            wrist3_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), UR3e::T56), wrist2_.model.transform);
+            tool_.model.transform = MatrixMultiply(UR3e::T6TOOL, wrist3_.model.transform);
+            break;
+        case URVersion::UR5e:
+            shoulder_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(0)), UR5e::TB1), base_.model.transform);
+            upperarm_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(1)), UR5e::T12), shoulder_.model.transform);
+            forearm_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(2)), UR5e::T23), upperarm_.model.transform);
+            wrist1_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(3)), UR5e::T34), forearm_.model.transform);
+            wrist2_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(4)), UR5e::T45), wrist1_.model.transform);
+            wrist3_.model.transform =
+                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), UR5e::T56), wrist2_.model.transform);
+            tool_.model.transform = MatrixMultiply(UR5e::T6TOOL, wrist3_.model.transform);
+            break;
+    }
 }
 
 void UR::draw() {

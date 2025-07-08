@@ -1,5 +1,3 @@
-#include <string>
-
 #include "raylib.h"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
@@ -20,22 +18,22 @@ int main(void) {
     SetTargetFPS(60);
     RLWindow window(1400, 950, "UR Robot Viewer");
 
+    // Load fonts
+    std::filesystem::path resource_dir = URVIEWER_RESOURCE_DIR;
     std::vector<int> codepoints_vec;
-    for (int i = 32; i <= 126; ++i)
-    {
+    for (int i = 32; i <= 126; ++i) {
         codepoints_vec.push_back(i);
     }
     codepoints_vec.push_back(0xE33E); // degree symbol
-
-    std::filesystem::path resource_dir = URVIEWER_RESOURCE_DIR;
     Font font = LoadFontEx((resource_dir / "fonts/JetBrainsMonoNerdFont-Regular.ttf").c_str(), 24, codepoints_vec.data(), codepoints_vec.size());
     GuiSetFont(font);
     GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
 
+    // Set up 3D camera
     RLCamera3D cam;
 
     // Load models and apply initial transforms
-    UR robot_model(URVersion::UR3e);
+    UR robot_model(URVersion::UR5e);
 
     // Connection to the robot
     // TODO: support EPICS backend

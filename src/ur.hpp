@@ -47,6 +47,7 @@ class UR {
     RLModel wrist2_;
     RLModel wrist3_;
     RLModel tool_;
+    URVersion version_;
 };
 
 
@@ -80,6 +81,39 @@ namespace UR3e {
     const Matrix T6TOOL = MatrixMultiply(
         // MatrixTranslate(0.0, 0.0, 0.072),
         MatrixTranslate(0.0, 0.0, 0.10),
+        MatrixRotateXYZ({0.0, 0.0, PI/2})
+    );
+}
+
+namespace UR5e {
+    const Matrix TSBASE = MatrixRotateX(-PI/2);
+
+    const Matrix TB1 = MatrixTranslate(0.0, 0.0, 0.086);
+
+    const Matrix T12 = MatrixMultiply(
+        MatrixTranslate(0.0, 0.0, 0.135),
+        MatrixRotateXYZ({-PI/2, 0.0, -PI/2})
+    );
+
+    const Matrix T23 = MatrixTranslate(0.0, 0.425, -0.12);
+
+    const Matrix T34 = MatrixMultiply(
+        MatrixTranslate(-0.3925, 0.0, 0.0925),
+        MatrixRotateXYZ({0.0, 0.0, -PI/2})
+    );
+
+    const Matrix T45 = MatrixMultiply(
+        MatrixTranslate(0.0, 0.0, 0.09),
+        MatrixRotateXYZ({PI/2, 0.0, PI})
+    );
+
+    const Matrix T56 = MatrixMultiply(
+        MatrixTranslate(0.0, 0.0, 0.062),
+        MatrixRotateXYZ({PI/2, 0.0, 0.0})
+    );
+
+    const Matrix T6TOOL = MatrixMultiply(
+        MatrixTranslate(0.0, 0.0, 0.095),
         MatrixRotateXYZ({0.0, 0.0, PI/2})
     );
 }
