@@ -28,7 +28,35 @@ UR::UR(URVersion version) :
     tool_(model_dir_ / "../robotiq-hand-e.obj", UR_MODEL_LABELS.at(7).data())
 {
 
-    switch (version) {
+    // switch (version) {
+    // case URVersion::UR3e:
+        // base_.model.transform = UR3e::TSBASE;
+        // shoulder_.model.transform = MatrixMultiply(UR3e::TB1, base_.model.transform);
+        // upperarm_.model.transform = MatrixMultiply(UR3e::T12, shoulder_.model.transform);
+        // forearm_.model.transform = MatrixMultiply(UR3e::T23, upperarm_.model.transform);
+        // wrist1_.model.transform = MatrixMultiply(UR3e::T34, forearm_.model.transform);
+        // wrist2_.model.transform = MatrixMultiply(UR3e::T45, wrist1_.model.transform);
+        // wrist3_.model.transform = MatrixMultiply(UR3e::T56, wrist2_.model.transform);
+        // tool_.model.transform = MatrixMultiply(UR3e::T6TOOL, wrist3_.model.transform);
+        // break;
+    // case URVersion::UR5e:
+        // base_.model.transform = UR5e::TSBASE;
+        // shoulder_.model.transform = MatrixMultiply(UR5e::TB1, base_.model.transform);
+        // upperarm_.model.transform = MatrixMultiply(UR5e::T12, shoulder_.model.transform);
+        // forearm_.model.transform = MatrixMultiply(UR5e::T23, upperarm_.model.transform);
+        // wrist1_.model.transform = MatrixMultiply(UR5e::T34, forearm_.model.transform);
+        // wrist2_.model.transform = MatrixMultiply(UR5e::T45, wrist1_.model.transform);
+        // wrist3_.model.transform = MatrixMultiply(UR5e::T56, wrist2_.model.transform);
+        // tool_.model.transform = MatrixMultiply(UR5e::T6TOOL, wrist3_.model.transform);
+        // break;
+    // }
+}
+
+void UR::load() {
+    for (int i = 0; i < UR_NUM_MODELS; i++) {
+        this->at(i).load();
+    }
+    switch (version_) {
     case URVersion::UR3e:
         base_.model.transform = UR3e::TSBASE;
         shoulder_.model.transform = MatrixMultiply(UR3e::TB1, base_.model.transform);
@@ -49,6 +77,12 @@ UR::UR(URVersion version) :
         wrist3_.model.transform = MatrixMultiply(UR5e::T56, wrist2_.model.transform);
         tool_.model.transform = MatrixMultiply(UR5e::T6TOOL, wrist3_.model.transform);
         break;
+    }
+}
+
+void UR::unload() {
+    for (int i = 0; i < UR_NUM_MODELS; i++) {
+        this->at(i).unload();
     }
 }
 

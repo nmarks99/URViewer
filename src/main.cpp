@@ -34,6 +34,7 @@ int main(void) {
 
     // Load models and apply initial transforms
     UR robot_model(URVersion::UR5e);
+    robot_model.load();
 
     // Connection to the robot
     // TODO: support EPICS backend

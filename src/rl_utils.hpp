@@ -11,6 +11,9 @@ struct RLModel {
     RLModel(std::filesystem::path model_path, const std::string &name);
     ~RLModel();
 
+    void load();
+    void unload();
+
     // delete copy constructor and copy assignment operator
     RLModel(const RLModel &) = delete;
     RLModel &operator=(const RLModel &) = delete;
@@ -21,6 +24,7 @@ struct RLModel {
     void draw_axes();
   
     std::string name = "";
+    std::string path = "";
 };
 
 struct RLWindow {

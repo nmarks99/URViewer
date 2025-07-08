@@ -3,34 +3,59 @@
 #include "rcamera.h"
 #include <raylib.h>
 
-RLModel::RLModel(const char *model_path) : model(LoadModel(model_path)) {}
+RLModel::RLModel(const char *model_path) : path(model_path) {}
 
-RLModel::RLModel(std::filesystem::path model_path) : model(LoadModel(model_path.string().c_str())) {}
+RLModel::RLModel(std::filesystem::path model_path) : path(model_path.string()) {}
 
 RLModel::RLModel(const char *model_path, const std::string &name)
-    : model(LoadModel(model_path)), name(name) {}
+    : name(name), path(model_path) {}
 
 RLModel::RLModel(std::filesystem::path model_path, const std::string &name)
-    : model(LoadModel(model_path.string().c_str())), name(name) {}
+    : name(name), path(model_path.string()) {}
 
 RLModel::~RLModel() {
-    if (model.meshCount > 0) {
-        TraceLog(LOG_INFO, "Unloading model\n");
+    // if (model.meshCount > 0) {
+        // TraceLog(LOG_INFO, "Unloading model\n");
+        // UnloadModel(model);
+    // }
+    if (IsModelValid(model)) {
+        UnloadModel(model);
+    }
+}
+
+void RLModel::load() {
+    model = LoadModel(path.c_str());
+}
+
+void RLModel::unload() {
+    if (IsModelValid(model)) {
         UnloadModel(model);
     }
 }
 
 void RLModel::draw() {
-    DrawModel(model, Vector3Zeros, 1.0, WHITE); 
+    if (IsModelValid(model)) {
+        DrawModel(model, Vector3Zeros, 1.0, WHITE); 
+    }
 }
 
 void RLModel::draw(Color color) {
-    DrawModel(model, Vector3Zeros, 1.0, color); 
+    if (IsModelValid(model)) {
+        DrawModel(model, Vector3Zeros, 1.0, color); 
+    }
 }
 
-void RLModel::draw_wires() { DrawModelWires(model, Vector3Zeros, 1.0, WHITE); }
+void RLModel::draw_wires() {
+    if (IsModelValid(model)) {
+        DrawModelWires(model, Vector3Zeros, 1.0, WHITE);
+    }
+}
 
-void RLModel::draw_axes() { draw_axes_3d(0.005, model.transform); }
+void RLModel::draw_axes() {
+    if (IsModelValid(model)) {
+        draw_axes_3d(0.005, model.transform);
+    }
+}
 
 
 RLWindow::RLWindow(int width, int height, const char *title) { InitWindow(width, height, title); };
