@@ -59,6 +59,7 @@ void UR::load() {
     this->for_each_model([](RLModel &model){
         model.load();
     });
+    loaded_ = true;
 
     // apply initial static transform
     this->at(0).model.transform = tfs_.at(0);
@@ -68,12 +69,15 @@ void UR::load() {
 }
 
 void UR::unload() {
+    if (not loaded_) { return; }
     this->for_each_model([](RLModel &model){
         model.unload();
     });
+    loaded_ = false;
 }
 
 void UR::update(const std::vector<float> &joint_angles) {
+    if (not loaded_) { return; }
     shoulder_.model.transform =
         MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(0)), tfs_.at(1)), base_.model.transform);
     upperarm_.model.transform =
@@ -90,12 +94,14 @@ void UR::update(const std::vector<float> &joint_angles) {
 }
 
 void UR::draw() {
+    if (not loaded_) { return; }
     for_each_model([](RLModel &model){
         model.draw();
     });
 }
 
 void UR::draw(int mask, bool opaque) {
+    if (not loaded_) { return; }
     int i = 0;
     for_each_model([&](RLModel &model){
         if (mask & (1 << i)) {
@@ -112,12 +118,14 @@ void UR::draw(int mask, bool opaque) {
 }
 
 void UR::draw_axes() {
+    if (not loaded_) { return; }
     for_each_model([](RLModel &model){
         model.draw_axes();
     });
 }
 
 void UR::draw_axes(int mask) {
+    if (not loaded_) { return; }
     int i = 0;
     for_each_model([&](RLModel &model){
         if (mask & (1 << i)) {

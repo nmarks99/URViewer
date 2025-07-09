@@ -10,7 +10,18 @@
 
 std::unique_ptr<IURCommunication> ur_comm;
 
-int main(void) {
+int main(int argc, char *argv[]) {
+    URVersion selected_robot = URVersion::UR3e;
+    if (argc > 1) {
+        if (strcmp(argv[1], "UR3") == 0) {
+            selected_robot = URVersion::UR3e;
+        } else if (strcmp(argv[1], "UR5") == 0) {
+            selected_robot = URVersion::UR5e;
+        } else {
+            printf("Unknown robot model '%s'\n", argv[1]);
+            return EXIT_FAILURE;
+        }
+    } 
 
     // initialize the window
     SetTraceLogLevel(LOG_INFO);
@@ -22,7 +33,7 @@ int main(void) {
     RLCamera3D cam;
 
     // Load models and apply initial transforms
-    UR robot_model(URVersion::UR3e);
+    UR robot_model(selected_robot);
     robot_model.load();
 
     // Connection to the robot
@@ -57,6 +68,7 @@ int main(void) {
             ur_comm->disconnect();
             ui.state.disconnect_called = false;
         }
+
         // UPDATE ///////////////////////////////////////////////
 
 

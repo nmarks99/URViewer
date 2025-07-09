@@ -20,7 +20,7 @@ constexpr std::array<std::string_view, UR_NUM_MODELS> UR_MODEL_LABELS = {
     "Tool",
 };
 
-enum class URVersion {
+enum class URVersion : int {
     UR3e,
     UR5e,
 };
@@ -58,6 +58,7 @@ class UR {
     RLModel wrist2_;
     RLModel wrist3_;
     RLModel tool_;
+    bool loaded_ = false;
 };
 
 
