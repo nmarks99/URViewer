@@ -1,6 +1,6 @@
 #include "ur.hpp"
 
-std::string get_model_dir(URVersion version) {
+std::filesystem::path get_model_dir(URVersion version) {
     // cmake defines the URVIEWER_MODEL_DIR macro
     std::filesystem::path model_dir = URVIEWER_RESOURCE_DIR;
 
@@ -12,7 +12,7 @@ std::string get_model_dir(URVersion version) {
         model_dir = model_dir / "UR5e";
         break;
     }
-    return model_dir.string();
+    return model_dir;
 }
 
 UR::UR(URVersion version) :
@@ -27,142 +27,104 @@ UR::UR(URVersion version) :
     wrist3_(model_dir_ / "wrist3.obj", UR_MODEL_LABELS.at(6).data()),
     tool_(model_dir_ / "../robotiq-hand-e.obj", UR_MODEL_LABELS.at(7).data())
 {
-
-    // switch (version) {
-    // case URVersion::UR3e:
-        // base_.model.transform = UR3e::TSBASE;
-        // shoulder_.model.transform = MatrixMultiply(UR3e::TB1, base_.model.transform);
-        // upperarm_.model.transform = MatrixMultiply(UR3e::T12, shoulder_.model.transform);
-        // forearm_.model.transform = MatrixMultiply(UR3e::T23, upperarm_.model.transform);
-        // wrist1_.model.transform = MatrixMultiply(UR3e::T34, forearm_.model.transform);
-        // wrist2_.model.transform = MatrixMultiply(UR3e::T45, wrist1_.model.transform);
-        // wrist3_.model.transform = MatrixMultiply(UR3e::T56, wrist2_.model.transform);
-        // tool_.model.transform = MatrixMultiply(UR3e::T6TOOL, wrist3_.model.transform);
-        // break;
-    // case URVersion::UR5e:
-        // base_.model.transform = UR5e::TSBASE;
-        // shoulder_.model.transform = MatrixMultiply(UR5e::TB1, base_.model.transform);
-        // upperarm_.model.transform = MatrixMultiply(UR5e::T12, shoulder_.model.transform);
-        // forearm_.model.transform = MatrixMultiply(UR5e::T23, upperarm_.model.transform);
-        // wrist1_.model.transform = MatrixMultiply(UR5e::T34, forearm_.model.transform);
-        // wrist2_.model.transform = MatrixMultiply(UR5e::T45, wrist1_.model.transform);
-        // wrist3_.model.transform = MatrixMultiply(UR5e::T56, wrist2_.model.transform);
-        // tool_.model.transform = MatrixMultiply(UR5e::T6TOOL, wrist3_.model.transform);
-        // break;
-    // }
+    switch (version) {
+    case URVersion::UR3e:
+        tfs_ = {
+            UR3e::TSBASE,
+            UR3e::TB1,
+            UR3e::T12,
+            UR3e::T23,
+            UR3e::T34,
+            UR3e::T45,
+            UR3e::T56,
+            UR3e::T6TOOL,
+        };
+        break;
+    case URVersion::UR5e:
+        tfs_ = {
+            UR5e::TSBASE,
+            UR5e::TB1,
+            UR5e::T12,
+            UR5e::T23,
+            UR5e::T34,
+            UR5e::T45,
+            UR5e::T56,
+            UR5e::T6TOOL,
+        };
+        break;
+    }
 }
 
 void UR::load() {
-    for (int i = 0; i < UR_NUM_MODELS; i++) {
-        this->at(i).load();
-    }
-    switch (version_) {
-    case URVersion::UR3e:
-        base_.model.transform = UR3e::TSBASE;
-        shoulder_.model.transform = MatrixMultiply(UR3e::TB1, base_.model.transform);
-        upperarm_.model.transform = MatrixMultiply(UR3e::T12, shoulder_.model.transform);
-        forearm_.model.transform = MatrixMultiply(UR3e::T23, upperarm_.model.transform);
-        wrist1_.model.transform = MatrixMultiply(UR3e::T34, forearm_.model.transform);
-        wrist2_.model.transform = MatrixMultiply(UR3e::T45, wrist1_.model.transform);
-        wrist3_.model.transform = MatrixMultiply(UR3e::T56, wrist2_.model.transform);
-        tool_.model.transform = MatrixMultiply(UR3e::T6TOOL, wrist3_.model.transform);
-        break;
-    case URVersion::UR5e:
-        base_.model.transform = UR5e::TSBASE;
-        shoulder_.model.transform = MatrixMultiply(UR5e::TB1, base_.model.transform);
-        upperarm_.model.transform = MatrixMultiply(UR5e::T12, shoulder_.model.transform);
-        forearm_.model.transform = MatrixMultiply(UR5e::T23, upperarm_.model.transform);
-        wrist1_.model.transform = MatrixMultiply(UR5e::T34, forearm_.model.transform);
-        wrist2_.model.transform = MatrixMultiply(UR5e::T45, wrist1_.model.transform);
-        wrist3_.model.transform = MatrixMultiply(UR5e::T56, wrist2_.model.transform);
-        tool_.model.transform = MatrixMultiply(UR5e::T6TOOL, wrist3_.model.transform);
-        break;
+    this->for_each_model([](RLModel &model){
+        model.load();
+    });
+
+    // apply initial static transform
+    this->at(0).model.transform = tfs_.at(0);
+    for (int i = 1; i < UR_NUM_MODELS; i++) {
+        this->at(i).model.transform = MatrixMultiply(tfs_.at(i), this->at(i-1).model.transform);
     }
 }
 
 void UR::unload() {
-    for (int i = 0; i < UR_NUM_MODELS; i++) {
-        this->at(i).unload();
-    }
+    this->for_each_model([](RLModel &model){
+        model.unload();
+    });
 }
 
 void UR::update(const std::vector<float> &joint_angles) {
-    switch (version_) {
-        case URVersion::UR3e:
-            shoulder_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(0)), UR3e::TB1), base_.model.transform);
-            upperarm_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(1)), UR3e::T12), shoulder_.model.transform);
-            forearm_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(2)), UR3e::T23), upperarm_.model.transform);
-            wrist1_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(3)), UR3e::T34), forearm_.model.transform);
-            wrist2_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(4)), UR3e::T45), wrist1_.model.transform);
-            wrist3_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), UR3e::T56), wrist2_.model.transform);
-            tool_.model.transform = MatrixMultiply(UR3e::T6TOOL, wrist3_.model.transform);
-            break;
-        case URVersion::UR5e:
-            shoulder_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(0)), UR5e::TB1), base_.model.transform);
-            upperarm_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(1)), UR5e::T12), shoulder_.model.transform);
-            forearm_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(2)), UR5e::T23), upperarm_.model.transform);
-            wrist1_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(3)), UR5e::T34), forearm_.model.transform);
-            wrist2_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(4)), UR5e::T45), wrist1_.model.transform);
-            wrist3_.model.transform =
-                MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), UR5e::T56), wrist2_.model.transform);
-            tool_.model.transform = MatrixMultiply(UR5e::T6TOOL, wrist3_.model.transform);
-            break;
-    }
+    shoulder_.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(0)), tfs_.at(1)), base_.model.transform);
+    upperarm_.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(1)), tfs_.at(2)), shoulder_.model.transform);
+    forearm_.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(2)), tfs_.at(3)), upperarm_.model.transform);
+    wrist1_.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(3)), tfs_.at(4)), forearm_.model.transform);
+    wrist2_.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(4)), tfs_.at(5)), wrist1_.model.transform);
+    wrist3_.model.transform =
+        MatrixMultiply(MatrixMultiply(MatrixRotateZ(joint_angles.at(5)), tfs_.at(6)), wrist2_.model.transform);
+    tool_.model.transform = MatrixMultiply(tfs_.at(7), wrist3_.model.transform);
 }
 
 void UR::draw() {
-    base_.draw();
-    shoulder_.draw();
-    upperarm_.draw();
-    forearm_.draw();
-    wrist1_.draw();
-    wrist2_.draw();
-    wrist3_.draw();
-    tool_.draw();
+    for_each_model([](RLModel &model){
+        model.draw();
+    });
 }
 
 void UR::draw(int mask, bool opaque) {
-    for (int i = 0; i < UR_NUM_MODELS; i++) {
+    int i = 0;
+    for_each_model([&](RLModel &model){
         if (mask & (1 << i)) {
-            this->at(i).draw_wires();
+            model.draw_wires();
         } else {
             if (opaque) {
-                this->at(i).draw(ColorAlpha(WHITE, 0.5));
+                model.draw(ColorAlpha(WHITE, 0.5));
             } else {
-                this->at(i).draw();
+                model.draw();
             }
         }
-    }
+        i++;
+    });
 }
 
 void UR::draw_axes() {
-    base_.draw_axes();
-    shoulder_.draw_axes();
-    upperarm_.draw_axes();
-    forearm_.draw_axes();
-    wrist1_.draw_axes();
-    wrist2_.draw_axes();
-    wrist3_.draw_axes();
-    tool_.draw_axes();
+    for_each_model([](RLModel &model){
+        model.draw_axes();
+    });
 }
 
 void UR::draw_axes(int mask) {
-    for (int i = 0; i < UR_NUM_MODELS; i++) {
+    int i = 0;
+    for_each_model([&](RLModel &model){
         if (mask & (1 << i)) {
-            this->at(i).draw_axes();
+            model.draw_axes();
         }
-    }
+        i++;
+    });
 }
 
 RLModel& UR::at(int i) {

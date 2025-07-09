@@ -14,10 +14,6 @@ RLModel::RLModel(std::filesystem::path model_path, const std::string &name)
     : name(name), path(model_path.string()) {}
 
 RLModel::~RLModel() {
-    // if (model.meshCount > 0) {
-        // TraceLog(LOG_INFO, "Unloading model\n");
-        // UnloadModel(model);
-    // }
     if (IsModelValid(model)) {
         UnloadModel(model);
     }
@@ -71,8 +67,6 @@ RLCamera3D::RLCamera3D() {
     camera.fovy = 45.0f;                         // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;      // Camera mode type
 }
-
-void CustomUpdateCamera(Camera *camera);
 
 void RLCamera3D::update() {
     // adpated from raylib UpdateCamera function

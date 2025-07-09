@@ -33,7 +33,7 @@ int main(void) {
     RLCamera3D cam;
 
     // Load models and apply initial transforms
-    UR robot_model(URVersion::UR5e);
+    UR robot_model(URVersion::UR3e);
     robot_model.load();
 
     // Connection to the robot

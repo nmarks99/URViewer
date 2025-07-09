@@ -22,7 +22,7 @@ constexpr std::array<std::string_view, UR_NUM_MODELS> UR_MODEL_LABELS = {
 
 enum class URVersion {
     UR3e,
-    UR5e, // TODO: support this
+    UR5e,
 };
 
 class UR {
@@ -36,11 +36,20 @@ class UR {
     void load();
     void unload();
     
-    // used to "index" the joints
+  private:
     RLModel& at(int index);
 
-  private:
+    template <typename Func>
+    void for_each_model(Func func) {
+        for (int i = 0; i < UR_NUM_MODELS; i++) {
+            func(at(i));
+        }
+    }
+
     std::filesystem::path model_dir_;
+    URVersion version_;
+    std::array<Matrix, UR_NUM_MODELS> tfs_;
+
     RLModel base_;
     RLModel shoulder_;
     RLModel upperarm_;
@@ -49,7 +58,6 @@ class UR {
     RLModel wrist2_;
     RLModel wrist3_;
     RLModel tool_;
-    URVersion version_;
 };
 
 
