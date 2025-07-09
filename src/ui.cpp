@@ -11,7 +11,29 @@ Ui::Ui()
     screen_height_(GetScreenHeight()),
     x_(screen_width_ - MENU_WIDTH),
     y_(0.0)
-{}
+{
+    // Load fonts
+    std::filesystem::path resource_dir = URVIEWER_RESOURCE_DIR;
+    std::vector<int> codepoints_vec;
+    for (int i = 32; i <= 126; ++i) {
+        codepoints_vec.push_back(i);
+    }
+    codepoints_vec.push_back(0xE33E); // degree symbol
+    font_ = LoadFontEx(
+        (std::filesystem::path(URVIEWER_RESOURCE_DIR) / "fonts/JetBrainsMonoNerdFont-Regular.ttf").c_str(),
+        24,
+        codepoints_vec.data(),
+        codepoints_vec.size()
+    );
+    GuiSetFont(font_);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
+}
+
+Ui::~Ui() {
+    if (IsFontValid(font_)) {
+        UnloadFont(font_);
+    }
+}
 
 void Ui::update(const RobotState &robot_state) {
     connected_ = robot_state.connected;
@@ -23,6 +45,11 @@ void Ui::update(const RobotState &robot_state) {
     screen_height_ = static_cast<float>(GetScreenHeight());
     x_ = static_cast<float>(screen_width_-MENU_WIDTH);
     y_ = 0.0;
+
+    // ask if user really wants to exit
+    if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) {
+        state.ask_to_quit = !state.ask_to_quit;
+    }
 }
 
 void Ui::draw() {

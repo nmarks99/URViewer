@@ -13,21 +13,10 @@ std::unique_ptr<IURCommunication> ur_comm;
 int main(void) {
 
     // initialize the window
-    SetTraceLogLevel(LOG_FATAL);
+    SetTraceLogLevel(LOG_INFO);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
     RLWindow window(1400, 950, "UR Robot Viewer");
-
-    // Load fonts
-    std::filesystem::path resource_dir = URVIEWER_RESOURCE_DIR;
-    std::vector<int> codepoints_vec;
-    for (int i = 32; i <= 126; ++i) {
-        codepoints_vec.push_back(i);
-    }
-    codepoints_vec.push_back(0xE33E); // degree symbol
-    Font font = LoadFontEx((resource_dir / "fonts/JetBrainsMonoNerdFont-Regular.ttf").c_str(), 24, codepoints_vec.data(), codepoints_vec.size());
-    GuiSetFont(font);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
 
     // Set up 3D camera
     RLCamera3D cam;
@@ -49,11 +38,6 @@ int main(void) {
     while (!ui.state.exit_window) {
 
         // UPDATE ///////////////////////////////////////////////
-        // ask if user really wants to exit
-        if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE)) {
-            ui.state.ask_to_quit = !ui.state.ask_to_quit;
-        }
-
         cam.update();
 
         // get data from robot

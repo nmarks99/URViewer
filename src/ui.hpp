@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "raylib.h"
 #include "i_comm.hpp"
 
 constexpr int TEXT_INPUT_SIZE = 128;
@@ -23,12 +24,14 @@ struct UIState {
 class Ui {
   public:
     Ui();
+    ~Ui();
     void update(const RobotState &robot_state);
     void draw();
 
     UIState state;
 
   private:
+    Font font_;
     float screen_width_;
     float screen_height_;
     float x_;
