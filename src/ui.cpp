@@ -71,7 +71,7 @@ void Ui::draw() {
 
     // Box to contain all menu elements
     if (state.show_menu) {
-        int res = GuiWindowBox(Rectangle{x_, y_, MENU_WIDTH, MENU_HEIGHT}, "Menu");
+        int res = GuiWindowBox(Rectangle{x_, y_, MENU_WIDTH, MENU_HEIGHT}, "Settings");
         if (res) {
             state.show_menu = false;
         }
