@@ -29,21 +29,15 @@ void RLModel::unload() {
     }
 }
 
-void RLModel::draw() {
-    if (IsModelValid(model)) {
-        DrawModel(model, Vector3Zeros, 1.0, WHITE); 
-    }
-}
-
 void RLModel::draw(Color color) {
     if (IsModelValid(model)) {
         DrawModel(model, Vector3Zeros, 1.0, color); 
     }
 }
 
-void RLModel::draw_wires() {
+void RLModel::draw_wires(Color color) {
     if (IsModelValid(model)) {
-        DrawModelWires(model, Vector3Zeros, 1.0, WHITE);
+        DrawModelWires(model, Vector3Zeros, 1.0, color);
     }
 }
 
@@ -54,7 +48,12 @@ void RLModel::draw_axes() {
 }
 
 
-RLWindow::RLWindow(int width, int height, const char *title) { InitWindow(width, height, title); };
+RLWindow::RLWindow(int width, int height, const char *title) {
+    SetTraceLogLevel(LOG_FATAL);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetTargetFPS(60);
+    InitWindow(width, height, title);
+};
 
 RLWindow::~RLWindow() { CloseWindow(); }
 

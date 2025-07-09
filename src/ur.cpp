@@ -105,7 +105,11 @@ void UR::draw(int mask, bool opaque) {
     int i = 0;
     for_each_model([&](RLModel &model){
         if (mask & (1 << i)) {
-            model.draw_wires();
+            if (opaque) {
+                model.draw_wires(ColorAlpha(WHITE, 0.5));
+            } else {
+                model.draw_wires();
+            }
         } else {
             if (opaque) {
                 model.draw(ColorAlpha(WHITE, 0.5));

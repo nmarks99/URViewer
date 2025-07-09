@@ -18,9 +18,8 @@ struct RLModel {
     RLModel(const RLModel &) = delete;
     RLModel &operator=(const RLModel &) = delete;
 
-    void draw();
-    void draw(Color color);
-    void draw_wires();
+    void draw(Color color = WHITE);
+    void draw_wires(Color color = WHITE);
     void draw_axes();
   
     std::string name = "";
@@ -41,7 +40,6 @@ struct RLCamera3D {
     RLCamera3D();
     void update();
     Camera camera;
-
 };
 
 void draw_axes_3d(float thickness, Matrix transform);
