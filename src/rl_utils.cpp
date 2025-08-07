@@ -3,6 +3,8 @@
 #include "rcamera.h"
 #include <raylib.h>
 
+constexpr double AXES_THICKNESS = 0.0075;
+
 RLModel::RLModel(const char *model_path) : path(model_path) {}
 
 RLModel::RLModel(std::filesystem::path model_path) : path(model_path.string()) {}
@@ -31,7 +33,7 @@ void RLModel::unload() {
 
 void RLModel::draw(Color color) {
     if (IsModelValid(model)) {
-        DrawModel(model, Vector3Zeros, 1.0, color); 
+        DrawModel(model, Vector3Zeros, 1.0, color);
     }
 }
 
@@ -43,7 +45,7 @@ void RLModel::draw_wires(Color color) {
 
 void RLModel::draw_axes() {
     if (IsModelValid(model)) {
-        draw_axes_3d(0.005, model.transform);
+        draw_axes_3d(AXES_THICKNESS, model.transform);
     }
 }
 

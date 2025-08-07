@@ -35,7 +35,7 @@ class UR {
     void update(const std::vector<float> &joint_angles);
     void load();
     void unload();
-    
+
   private:
     RLModel& at(int index);
 
@@ -63,9 +63,12 @@ class UR {
 
 
 namespace UR3e {
-    const Matrix TSBASE = MatrixRotateX(-PI/2);
+    const Matrix TSBASE = MatrixRotateXYZ({-PI/2, 0.0, PI});
 
-    const Matrix TB1 = MatrixTranslate(0.0, 0.0, 0.15);
+    const Matrix TB1 = MatrixMultiply(
+        MatrixTranslate(0.0, 0.0, 0.15),
+        MatrixRotateZ(PI)
+    );
 
     const Matrix T12 = MatrixMultiply(
         MatrixTranslate(0.0, 0.0, 0.12),
@@ -90,16 +93,18 @@ namespace UR3e {
     );
 
     const Matrix T6TOOL = MatrixMultiply(
-        // MatrixTranslate(0.0, 0.0, 0.072),
         MatrixTranslate(0.0, 0.0, 0.10),
         MatrixRotateXYZ({0.0, 0.0, PI/2})
     );
 }
 
 namespace UR5e {
-    const Matrix TSBASE = MatrixRotateX(-PI/2);
+    const Matrix TSBASE = MatrixRotateXYZ({-PI/2, 0.0, PI});
 
-    const Matrix TB1 = MatrixTranslate(0.0, 0.0, 0.086);
+    const Matrix TB1 = MatrixMultiply(
+        MatrixTranslate(0.0, 0.0, 0.086),
+        MatrixRotateZ(PI)
+    );
 
     const Matrix T12 = MatrixMultiply(
         MatrixTranslate(0.0, 0.0, 0.135),
