@@ -6,11 +6,12 @@
 constexpr int MENU_WIDTH = 400;
 constexpr int MENU_HEIGHT = 450;
 
-Ui::Ui() 
+Ui::Ui(const UIState &ui_state)
     : screen_width_(GetScreenWidth()),
     screen_height_(GetScreenHeight()),
     x_(screen_width_ - MENU_WIDTH),
-    y_(0.0)
+    y_(0.0),
+    state(ui_state)
 {
     // Load fonts
     std::filesystem::path resource_dir = URVIEWER_RESOURCE_DIR;
@@ -84,7 +85,7 @@ void Ui::draw() {
 
 
     // ------------------------------------------------------------------
-    // Connection 
+    // Connection
     // ------------------------------------------------------------------
 
     // Connection string (IP addr/PV prefix) input box
@@ -94,7 +95,7 @@ void Ui::draw() {
         .y = y_+40,
         .width = CONN_REC_WIDTH,
         .height = 25
-    }, state.conn_string, TEXT_INPUT_SIZE, state.conn_text_edit_mode)) {
+    }, state.connection_string.data(), TEXT_INPUT_SIZE, state.conn_text_edit_mode)) {
         state.conn_text_edit_mode = !state.conn_text_edit_mode;
     }
 
@@ -134,7 +135,7 @@ void Ui::draw() {
 
 
     // ------------------------------------------------------------------
-    // Robot data/settings 
+    // Robot data/settings
     // ------------------------------------------------------------------
 
     static constexpr float s2_y_start = 150;

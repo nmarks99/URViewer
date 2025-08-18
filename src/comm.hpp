@@ -1,5 +1,5 @@
 #pragma once
-#include "i_comm.hpp"
+#include "comm_base.hpp"
 #include "ur_rtde/rtde_receive_interface.h"
 
 class URRtdeComm : public IURCommunication{

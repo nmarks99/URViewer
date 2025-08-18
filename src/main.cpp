@@ -5,24 +5,63 @@
 #include "rl_utils.hpp"
 #include "ur.hpp"
 #include "ui.hpp"
-#include "i_comm.hpp"
+#include "comm_base.hpp"
 #include "comm.hpp"
+#include "argh.h"
+
+const std::string CLI_HELP_MESSAGE = R"(
+URViewer - Live 3D viewer for Universal Robots
+
+Usage:
+  URViewer [options]
+
+Options:
+  -h, --help    Show this help message and exit.
+  --model       Robot model (UR3 or UR5)
+  --IP          IP address of the robot controller
+
+Examples:
+    # start URViewer with UR3 model and given IP
+    ./URViewer --model UR3 --IP 192.168.1.100
+
+    # start URViewer with default model (UR3)
+    # Enter IP address in GUI
+    ./URViewer
+)";
 
 std::unique_ptr<IURCommunication> ur_comm;
 
 int main(int argc, char *argv[]) {
 
-    // Set robot model from command line arg
+    // Parse command line arguments
+    argh::parser args;
+    args.add_params({"--model"});
+    args.add_params({"--IP", "--ip", "--prefix"});
+    args.parse(argc, argv);
+
+    if (args["-h"] or args["--help"]) {
+        std::cout << CLI_HELP_MESSAGE << std::endl;
+        return EXIT_SUCCESS;
+    }
+
     URVersion ur_version = URVersion::UR3e;
-    if (argc > 1) {
-        std::string_view arg = argv[1];
-        if (arg.find("UR3") != std::string_view::npos) {
-            ur_version = URVersion::UR3e;
-        } else if (arg.find("UR5") != std::string_view::npos) {
-            ur_version = URVersion::UR5e;
-        } else {
-            std::cerr << "Unknown robot model in argument: '" << arg << "'\n";
-            return EXIT_FAILURE;
+    std::string connection_string = "";
+    if (args.size()) {
+        const std::string model = args({"--model"}).str();
+        if (model.size()) {
+            if (model == "UR3" or model == "UR3e") {
+                ur_version = URVersion::UR3e;
+            } else if (model == "UR5" or model == "UR5e") {
+                ur_version = URVersion::UR5e;
+            } else {
+                std::cerr << "Unknown model " << model << std::endl;
+                return EXIT_FAILURE;
+            }
+        }
+        const std::string conn = args({"--ip", "--IP", "--prefix"}).str();
+        if (conn.size()) {
+            connection_string = conn.size() ? conn : "";
+            std::cout << "Connection string: " << connection_string << std::endl;
         }
     }
 
@@ -33,7 +72,9 @@ int main(int argc, char *argv[]) {
     RLCamera3D cam;
 
     // For rendering the UI and keeping track of its state
-    Ui ui;
+    Ui ui(UIState{
+        .connection_string = connection_string,
+    });
 
     // Load models and apply initial transforms
     UR robot_model(ur_version);
@@ -52,7 +93,7 @@ int main(int argc, char *argv[]) {
         cam.update();
 
         if (ui.state.connect_called) {
-            ur_comm->connect(ui.state.conn_string);
+            ur_comm->connect(ui.state.connection_string);
             ui.state.connect_called = false;
         } else if (ui.state.disconnect_called) {
             ur_comm->disconnect();

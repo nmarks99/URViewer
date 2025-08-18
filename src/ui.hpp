@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include "raylib.h"
-#include "i_comm.hpp"
+#include "comm_base.hpp"
 
 constexpr int TEXT_INPUT_SIZE = 128;
 
@@ -10,7 +10,7 @@ struct UIState {
     int axes_mask = 0;
     int wires_mask = 0;
 
-    char conn_string[128] = "0.0.0.0";
+    std::string connection_string = "0.0.0.0";
     bool conn_text_edit_mode = false;
     bool connect_called = false;
     bool disconnect_called = false;
@@ -23,11 +23,10 @@ struct UIState {
 
 class Ui {
   public:
-    Ui();
+    Ui(const UIState &state);
     ~Ui();
     void update(const RobotState &robot_state);
     void draw();
-
     UIState state;
 
   private:
