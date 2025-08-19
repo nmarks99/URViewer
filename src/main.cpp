@@ -82,7 +82,8 @@ int main(int argc, char *argv[]) {
 
     // Connection to the robot
     // There may be additional backends besides URRtdeComm in the future
-    ur_comm = std::make_unique<URRtdeComm>();
+    // ur_comm = std::make_unique<URRtdeComm>();
+    ur_comm = std::make_unique<UREpicsComm>();
 
     // Used to store data from the robot
     RobotState robot_state;

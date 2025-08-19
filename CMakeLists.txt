@@ -66,6 +66,59 @@ else()
     endif()
 endif()
 
+# --- EPICS Base ---------------------------------------------------------------
+# Get path to EPICS base from environment variable or -DEPICS_BASE
+if(NOT DEFINED EPICS_BASE OR EPICS_BASE STREQUAL "")
+    set(EPICS_BASE $ENV{EPICS_BASE})
+endif()
+if(NOT EPICS_BASE OR EPICS_BASE STREQUAL "")
+    message(FATAL_ERROR "Missing required variable 'EPICS_BASE'. Provide it via -DEPICS_BASE=... or set the EPICS_BASE environment variable.")
+endif()
+if(NOT IS_DIRECTORY "${EPICS_BASE}")
+    message(FATAL_ERROR "Specified EPICS_BASE does not exist: ${EPICS_BASE}")
+endif()
+
+# Put it into the cache so it’s visible in GUI tools or later CMake runs
+set(EPICS_BASE "${EPICS_BASE}" CACHE STRING "Path to EPICS base")
+message(STATUS "Found EPICS_BASE: ${EPICS_BASE}")
+
+# Get EPICS host architecture
+set(EPICS_HOST_ARCH "$ENV{EPICS_HOST_ARCH}" CACHE STRING "Host architecture (e.g. linux-x86_64")
+if (NOT EPICS_HOST_ARCH)
+    message(FATAL_ERROR "'EPICS_HOST_ARCH' not defined")
+endif()
+message(STATUS "EPICS_HOST_ARCH: ${EPICS_HOST_ARCH}")
+
+link_directories(${EPICS_BASE}/lib/${EPICS_HOST_ARCH})
+
+if(APPLE)
+    set(EPICS_LIB_EXT ".dylib")
+elseif(UNIX)
+    set(EPICS_LIB_EXT ".so")
+else()
+    set(EPICS_LIB_EXT ".a")
+endif()
+
+set(EPICS_BASE_LIBRARIES
+    "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}/libpvAccessCA${EPICS_LIB_EXT}"
+    "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}/libca${EPICS_LIB_EXT}"
+    "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}/libpvAccess${EPICS_LIB_EXT}"
+    "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}/libpvData${EPICS_LIB_EXT}"
+    "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}/libCom${EPICS_LIB_EXT}"
+)
+
+set(EPICS_BASE_INCLUDES
+    ${EPICS_BASE}/include
+    ${EPICS_BASE}/include/compiler/gcc
+    ${EPICS_BASE}/include/compiler/clang
+    ${EPICS_BASE}/include/pv
+    ${EPICS_BASE}/include/pva
+    ${EPICS_BASE}/include/os/Linux
+    ${EPICS_BASE}/include/os/Darwin
+)
+# ------------------------------------------------------------------------------
+
+
 # Define a preprocessor macro for the resources directory
 add_compile_definitions(URVIEWER_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources")
 
@@ -81,9 +134,11 @@ add_executable(URViewer
 target_include_directories(URViewer
     PRIVATE src
     PRIVATE external
+    PRIVATE ${EPICS_BASE_INCLUDES}
 )
 
 target_link_libraries(URViewer
     PRIVATE raylib
     PRIVATE ur_rtde::rtde
+    PRIVATE ${EPICS_BASE_LIBRARIES}
 )
