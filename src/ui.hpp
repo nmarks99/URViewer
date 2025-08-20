@@ -10,7 +10,7 @@ struct UIState {
     int axes_mask = 0;
     int wires_mask = 0;
 
-    std::string connection_string = "0.0.0.0";
+    std::string connection_string;
     bool conn_text_edit_mode = false;
     bool connect_called = false;
     bool disconnect_called = false;
@@ -19,6 +19,10 @@ struct UIState {
     bool exit_window = false;
 
     bool show_menu = true;
+
+    UIState() {
+        connection_string.resize(TEXT_INPUT_SIZE, '\0');
+    }
 };
 
 class Ui {
