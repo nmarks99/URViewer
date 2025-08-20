@@ -59,10 +59,7 @@ int main(int argc, char *argv[]) {
             }
         }
         const std::string conn = args({"--ip", "--IP", "--prefix"}).str();
-        if (conn.size()) {
-            connection_string = conn.size() ? conn : "";
-            std::cout << "Connection string: " << connection_string << std::endl;
-        }
+        connection_string = conn.size() ? conn : "";
     }
 
     // initialize the window
@@ -72,9 +69,9 @@ int main(int argc, char *argv[]) {
     RLCamera3D cam;
 
     // For rendering the UI and keeping track of its state
-    Ui ui(UIState{
-        .connection_string = connection_string,
-    });
+    UIState ui_state;
+    std::copy(connection_string.begin(), connection_string.end(), ui_state.connection_string.begin());
+    Ui ui(ui_state);
 
     // Load models and apply initial transforms
     UR robot_model(ur_version);
