@@ -16,17 +16,22 @@ Usage:
   URViewer [options]
 
 Options:
-  -h, --help    Show this help message and exit.
-  --model       Robot model (UR3 or UR5)
-  --IP          IP address of the robot controller
+  -h, --help          Show this help message and exit
+  --model <model>     Robot model to use (UR3, UR5)
+  --backend <backend> Communication backend (EPICS, RTDE)
+  --IP <ip_address>   IP address of the robot controller (if using RTDE backend)
+  --prefic <prefix>   IOC prefix (if using EPICS backend)
 
 Examples:
-    # start URViewer with UR3 model and given IP
-    ./URViewer --model UR3 --IP 192.168.1.100
+  # Start URViewer with UR3 model and given IP
+  ./URViewer --model UR3 --IP 192.168.1.100
 
-    # start URViewer with default model (UR3)
-    # Enter IP address in GUI
-    ./URViewer
+  # Start URViewer with UR3 model and given EPICS IOC prefix
+  ./URViewer --model UR3 --backend EPICS --prefix 192.168.1.100
+
+  # Start URViewer with defaults:
+  # RTDE backend, UR3 model, IP must be entered in GUI
+  ./URViewer
 )";
 
 std::unique_ptr<IURCommunication> ur_comm;
@@ -77,7 +82,6 @@ int main(int argc, char *argv[]) {
     // For rendering the UI and keeping track of its state
     UIState ui_state;
     std::copy(connection_string.begin(), connection_string.end(), ui_state.connection_string.begin());
-    std::cout << "using connection string " << ui_state.connection_string << "\n";
     Ui ui(ui_state);
 
     // Load models and apply initial transforms

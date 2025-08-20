@@ -48,13 +48,7 @@ RobotState URRtdeComm::get_robot_state() {
         if (recv_->isConnected()) {
             connected = true;
 
-            auto t0 = std::chrono::high_resolution_clock::now();
             qvec_double = recv_->getActualQ();
-            auto t1 = std::chrono::high_resolution_clock::now();
-
-            double elapsed_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
-            std::cout << "[RTDE] recv_->getActualQ() took " << elapsed_ms << " ms\n";
-
             for (int i = 0; i < qvec_double.size(); i++) {
                 qvec_float.at(i) = static_cast<float>(qvec_double.at(i));
             }
@@ -66,32 +60,36 @@ RobotState URRtdeComm::get_robot_state() {
     };
 }
 
+
 inline const std::string JOINT_ANGLES_PV_NAME = "Receive:ActualJointPositions";
 
-UREpicsComm::UREpicsComm() {
+void EPICSConnMon::connectEvent(const pvac::ConnectEvent &event) { connected_ = event.connected; }
+
+UREpicsComm::UREpicsComm() : connection_monitor_(std::make_unique<EPICSConnMon>()) {
     epics::pvAccess::ca::CAClientFactory::start();
     provider_ = std::make_unique<pvac::ClientProvider>("ca");
 }
 
 void UREpicsComm::disconnect() {
+    channel_->removeConnectListener(connection_monitor_.get());
     channel_ = nullptr;
+    monitor_ = nullptr;
     connected_ = false;
+    connection_monitor_->connected_ = false;
 };
 
 bool UREpicsComm::connected() {
-    return connected_;
+    return this->connection_monitor_->connected_;
 };
 
 bool UREpicsComm::connect(const std::string &ioc_prefix) {
     if (not connected_) {
         // ioc_prefix might contain trailing '\0' characters so we do this to fix
         const std::string pv_name = std::string(ioc_prefix.c_str()) + JOINT_ANGLES_PV_NAME;
-        try {
-            channel_ = std::make_unique<pvac::ClientChannel>(provider_.get()->connect(pv_name));
-            connected_ = true;
-        } catch (std::exception &e) {
-            std::cout << e.what() << std::endl;
-        }
+        channel_ = std::make_unique<pvac::ClientChannel>(provider_.get()->connect(pv_name));
+        channel_->addConnectListener(connection_monitor_.get());
+        monitor_ = std::make_unique<pvac::MonitorSync>(channel_->monitor());
+        connected_ = true;
     }
     return connected_;
 }
@@ -99,25 +97,39 @@ bool UREpicsComm::connect(const std::string &ioc_prefix) {
 RobotState UREpicsComm::get_robot_state() {
     namespace pvd = epics::pvData;
 
-    if (not connected_ or not channel_) {
+    connected_ = this->connected();
+    if (not connected_ or not channel_ or not monitor_) {
         return RobotState {
             .connected = false,
-            .joint_angles = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
         };
     }
 
-    std::vector<float> qvec(6);
-    auto pfield = channel_->get();
-    pvd::shared_vector<const double> q_shared = pfield->getSubFieldT<pvd::PVDoubleArray>("value")->view();
-    std::copy(q_shared.begin(), q_shared.end(), qvec.begin());
-
-    for (auto &v : qvec) {
-        v = v * (M_PI/180.0);
+    if (monitor_->test()) {
+        switch (monitor_->event.event) {
+            case pvac::MonitorEvent::Data:
+                while (monitor_->poll()) {
+                    auto pfield = monitor_->root.get();
+                    pvd::shared_vector<const double> q_shared = pfield->getSubFieldT<pvd::PVDoubleArray>("value")->view();
+                    std::copy(q_shared.begin(), q_shared.end(), last_angles_.begin());
+                    for (auto &v : last_angles_) {
+                        v = v * (M_PI/180.0);
+                    }
+                }
+                break;
+            case pvac::MonitorEvent::Disconnect:
+                connected_ = false;
+                break;
+            case pvac::MonitorEvent::Fail:
+                connected_ = false;
+                break;
+            case pvac::MonitorEvent::Cancel:
+                connected_ = false;
+                break;
+        }
     }
-
     return RobotState {
         .connected = true,
-        .joint_angles = qvec
+        .joint_angles = last_angles_
     };
 }
 
