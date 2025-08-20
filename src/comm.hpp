@@ -27,7 +27,7 @@ class UREpicsComm : public IURCommunication{
 
   private:
     std::string prefix_;
-    std::shared_ptr<pvac::ClientProvider> provider_;
+    std::unique_ptr<pvac::ClientProvider> provider_;
     std::unique_ptr<pvac::ClientChannel> channel_;
     bool connected_ = false;
 };

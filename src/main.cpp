@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
     // Parse command line arguments
     argh::parser args;
     args.add_params({"--model"});
+    args.add_params({"--backend"});
     args.add_params({"--IP", "--ip", "--prefix"});
     args.parse(argc, argv);
 
@@ -46,20 +47,25 @@ int main(int argc, char *argv[]) {
 
     URVersion ur_version = URVersion::UR3e;
     std::string connection_string = "";
+    CommBackend backend;
+
     if (args.size()) {
-        const std::string model = args({"--model"}).str();
-        if (model.size()) {
-            if (model == "UR3" or model == "UR3e") {
+        const std::string model_arg_str = args({"--model"}).str();
+        if (model_arg_str.size()) {
+            if (model_arg_str == "UR3" or model_arg_str == "UR3e") {
                 ur_version = URVersion::UR3e;
-            } else if (model == "UR5" or model == "UR5e") {
+            } else if (model_arg_str == "UR5" or model_arg_str == "UR5e") {
                 ur_version = URVersion::UR5e;
             } else {
-                std::cerr << "Unknown model " << model << std::endl;
+                std::cerr << "Unknown UR model " << model_arg_str << std::endl;
                 return EXIT_FAILURE;
             }
         }
-        const std::string conn = args({"--ip", "--IP", "--prefix"}).str();
-        connection_string = conn.size() ? conn : "";
+        const std::string conn_arg_str = args({"--ip", "--IP", "--prefix"}).str();
+        connection_string = conn_arg_str.size() ? conn_arg_str : "";
+
+        const std::string backend_arg_str = args({"--backend"}).str();
+        backend = (backend_arg_str == "EPICS") ? CommBackend::EPICS : CommBackend::RTDE;
     }
 
     // initialize the window
@@ -71,6 +77,7 @@ int main(int argc, char *argv[]) {
     // For rendering the UI and keeping track of its state
     UIState ui_state;
     std::copy(connection_string.begin(), connection_string.end(), ui_state.connection_string.begin());
+    std::cout << "using connection string " << ui_state.connection_string << "\n";
     Ui ui(ui_state);
 
     // Load models and apply initial transforms
@@ -78,9 +85,11 @@ int main(int argc, char *argv[]) {
     robot_model.load();
 
     // Connection to the robot
-    // There may be additional backends besides URRtdeComm in the future
-    // ur_comm = std::make_unique<URRtdeComm>();
-    ur_comm = std::make_unique<UREpicsComm>();
+    if (backend == CommBackend::EPICS) {
+        ur_comm = std::make_unique<UREpicsComm>();
+    } else if (backend == CommBackend::RTDE) {
+        ur_comm = std::make_unique<URRtdeComm>();
+    }
 
     // Used to store data from the robot
     RobotState robot_state;

@@ -47,7 +47,14 @@ RobotState URRtdeComm::get_robot_state() {
     if (recv_) {
         if (recv_->isConnected()) {
             connected = true;
+
+            auto t0 = std::chrono::high_resolution_clock::now();
             qvec_double = recv_->getActualQ();
+            auto t1 = std::chrono::high_resolution_clock::now();
+
+            double elapsed_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
+            std::cout << "[RTDE] recv_->getActualQ() took " << elapsed_ms << " ms\n";
+
             for (int i = 0; i < qvec_double.size(); i++) {
                 qvec_float.at(i) = static_cast<float>(qvec_double.at(i));
             }
@@ -59,13 +66,16 @@ RobotState URRtdeComm::get_robot_state() {
     };
 }
 
+inline const std::string JOINT_ANGLES_PV_NAME = "Receive:ActualJointPositions";
+
 UREpicsComm::UREpicsComm() {
     epics::pvAccess::ca::CAClientFactory::start();
-    provider_ = std::make_shared<pvac::ClientProvider>("ca");
+    provider_ = std::make_unique<pvac::ClientProvider>("ca");
 }
 
 void UREpicsComm::disconnect() {
-    // do nothing
+    channel_ = nullptr;
+    connected_ = false;
 };
 
 bool UREpicsComm::connected() {
@@ -74,12 +84,14 @@ bool UREpicsComm::connected() {
 
 bool UREpicsComm::connect(const std::string &ioc_prefix) {
     if (not connected_) {
-        std::cout << ioc_prefix + "Receive:ActualJointPositions" << "\n";
-        if (provider_) {
-            std::cout << "provder_ ok" << "\n";
+        // ioc_prefix might contain trailing '\0' characters so we do this to fix
+        const std::string pv_name = std::string(ioc_prefix.c_str()) + JOINT_ANGLES_PV_NAME;
+        try {
+            channel_ = std::make_unique<pvac::ClientChannel>(provider_.get()->connect(pv_name));
+            connected_ = true;
+        } catch (std::exception &e) {
+            std::cout << e.what() << std::endl;
         }
-        channel_ = std::make_unique<pvac::ClientChannel>(provider_.get()->connect(ioc_prefix + "Receive:ActualJointPositions"));
-        connected_ = true;
     }
     return connected_;
 }
@@ -108,3 +120,4 @@ RobotState UREpicsComm::get_robot_state() {
         .joint_angles = qvec
     };
 }
+

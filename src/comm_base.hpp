@@ -7,6 +7,11 @@ struct RobotState {
     std::vector<float> joint_angles = std::vector<float>(6, 0.0f);
 };
 
+enum class CommBackend {
+    EPICS,
+    RTDE
+};
+
 class IURCommunication {
   public:
     virtual bool connect(const std::string &conn_string) = 0;
