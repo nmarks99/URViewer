@@ -95,8 +95,8 @@ void Ui::draw() {
         .y = y_+40,
         .width = CONN_REC_WIDTH,
         .height = 25
-    }, state.connection_string.data(), TEXT_INPUT_SIZE, state.conn_text_edit_mode)) {
-        state.conn_text_edit_mode = !state.conn_text_edit_mode;
+    }, state.connection_string.data(), TEXT_INPUT_SIZE, state.conn_text_active)) {
+        state.conn_text_active = !state.conn_text_active;
     }
 
     if (GuiButton(Rectangle{

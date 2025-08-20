@@ -80,9 +80,9 @@ int main(int argc, char *argv[]) {
     RLCamera3D cam;
 
     // For rendering the UI and keeping track of its state
-    UIState ui_state;
-    std::copy(connection_string.begin(), connection_string.end(), ui_state.connection_string.begin());
-    Ui ui(ui_state);
+    UIState ui_state0;
+    std::copy(connection_string.begin(), connection_string.end(), ui_state0.connection_string.begin());
+    Ui ui(ui_state0);
 
     // Load models and apply initial transforms
     UR robot_model(ur_version);
@@ -101,7 +101,9 @@ int main(int argc, char *argv[]) {
     while (!ui.state.exit_window) {
 
         // UPDATE ///////////////////////////////////////////////
-        cam.update();
+        if (!ui.state.conn_text_active) {
+            cam.update();
+        }
 
         if (ui.state.connect_called) {
             ur_comm->connect(ui.state.connection_string);

@@ -11,7 +11,7 @@ struct UIState {
     int wires_mask = 0;
 
     std::string connection_string;
-    bool conn_text_edit_mode = false;
+    bool conn_text_active = false;
     bool connect_called = false;
     bool disconnect_called = false;
 

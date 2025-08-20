@@ -21,7 +21,7 @@ struct RLModel {
     void draw(Color color = WHITE);
     void draw_wires(Color color = WHITE);
     void draw_axes();
-  
+
     std::string name = "";
     std::string path = "";
 };
