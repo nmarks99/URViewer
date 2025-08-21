@@ -11,6 +11,8 @@ struct UIState {
     int wires_mask = 0;
 
     std::string connection_string;
+    bool dropdown_active = false;
+    int dropdown_selected = 0;
     bool conn_text_active = false;
     bool connect_called = false;
     bool disconnect_called = false;

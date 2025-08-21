@@ -133,6 +133,11 @@ void Ui::draw() {
     }, connection_status_msg.data());
     GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(BLACK));
 
+    // Dropdown for communciation backend selection
+    constexpr float DROPDOWN_REC_WIDTH = 200.0;
+    if (GuiDropdownBox(Rectangle{20, 20, 200, 30}, "TCP/IP;EPICS", &state.dropdown_selected, state.dropdown_active)) {
+        state.dropdown_active = !state.dropdown_active;
+    }
 
     // ------------------------------------------------------------------
     // Robot data/settings
