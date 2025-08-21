@@ -20,7 +20,7 @@ Options:
   --model <model>     Robot model to use (UR3, UR5)
   --backend <backend> Communication backend (EPICS, RTDE)
   --IP <ip_address>   IP address of the robot controller (if using RTDE backend)
-  --prefic <prefix>   IOC prefix (if using EPICS backend)
+  --prefix <prefix>   IOC prefix (if using EPICS backend)
 
 Examples:
   # Start URViewer with UR3 model and given IP

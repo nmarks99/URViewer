@@ -72,6 +72,7 @@ UREpicsComm::UREpicsComm() : connection_monitor_(std::make_unique<EPICSConnMon>(
 
 void UREpicsComm::disconnect() {
     channel_->removeConnectListener(connection_monitor_.get());
+    provider_->disconnect();
     channel_ = nullptr;
     monitor_ = nullptr;
     connected_ = false;
@@ -83,15 +84,16 @@ bool UREpicsComm::connected() {
 };
 
 bool UREpicsComm::connect(const std::string &ioc_prefix) {
-    if (not connected_) {
-        // ioc_prefix might contain trailing '\0' characters so we do this to fix
-        const std::string pv_name = std::string(ioc_prefix.c_str()) + JOINT_ANGLES_PV_NAME;
-        channel_ = std::make_unique<pvac::ClientChannel>(provider_.get()->connect(pv_name));
-        channel_->addConnectListener(connection_monitor_.get());
-        monitor_ = std::make_unique<pvac::MonitorSync>(channel_->monitor());
-        connected_ = true;
+
+    if (connected_) {
+        this->disconnect();
     }
-    return connected_;
+    // ioc_prefix might contain trailing '\0' characters so we do this to fix
+    const std::string pv_name = std::string(ioc_prefix.c_str()) + JOINT_ANGLES_PV_NAME;
+    channel_ = std::make_unique<pvac::ClientChannel>(provider_.get()->connect(pv_name));
+    channel_->addConnectListener(connection_monitor_.get());
+    monitor_ = std::make_unique<pvac::MonitorSync>(channel_->monitor());
+    return true; // this "connect" never fails, though PV might not be connected
 }
 
 RobotState UREpicsComm::get_robot_state() {
@@ -104,6 +106,7 @@ RobotState UREpicsComm::get_robot_state() {
         };
     }
 
+    // MonitorSync::test() is non-blocking as opposed to ClientChannel::get()
     if (monitor_->test()) {
         switch (monitor_->event.event) {
             case pvac::MonitorEvent::Data:
@@ -112,7 +115,7 @@ RobotState UREpicsComm::get_robot_state() {
                     pvd::shared_vector<const double> q_shared = pfield->getSubFieldT<pvd::PVDoubleArray>("value")->view();
                     std::copy(q_shared.begin(), q_shared.end(), last_angles_.begin());
                     for (auto &v : last_angles_) {
-                        v = v * (M_PI/180.0);
+                        v = v * (M_PI/180.0); // convert degrees to radians
                     }
                 }
                 break;
