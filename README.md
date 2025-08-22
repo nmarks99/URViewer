@@ -1,8 +1,7 @@
 # URViewer
 A no frills 3D viewer for Universal Robots based on [raylib](https://github.com/raysan5/raylib).
 
-![screenshot](https://github.com/user-attachments/assets/76936aec-1a7f-4306-9d05-366aed537e25)
-
+![URViewerScreenshot](https://github.com/user-attachments/assets/fb6a93a0-3423-4521-aa7e-01342208b9ba)
 
 # Installation
 
