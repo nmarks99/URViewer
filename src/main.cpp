@@ -98,11 +98,26 @@ int main(int argc, char *argv[]) {
     // Used to store data from the robot
     RobotState robot_state;
 
+    CommBackend last_backend = backend;
+
     while (!ui.state.exit_window) {
 
         // UPDATE ///////////////////////////////////////////////
         if (!ui.state.conn_text_active) {
             cam.update();
+        }
+
+        CommBackend selected_backend = (ui.state.dropdown_selected == 0) ? CommBackend::RTDE : CommBackend::EPICS;
+        if (selected_backend != last_backend) {
+            ur_comm->disconnect();
+            if (selected_backend == CommBackend::RTDE) {
+                std::cout << "RTDE backend!" << std::endl;
+                ur_comm = std::make_unique<URRtdeComm>();
+            } else {
+                ur_comm = std::make_unique<UREpicsComm>();
+                std::cout << "EPICS backend!" << std::endl;
+            }
+            last_backend = selected_backend;
         }
 
         if (ui.state.connect_called) {
