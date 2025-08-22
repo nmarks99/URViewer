@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 
     // Load models and apply initial transforms
     UR robot_model(ur_version);
-    robot_model.load();
+    // robot_model.load();
 
     // Connection to the robot
     if (backend == CommBackend::EPICS) {
@@ -98,7 +98,8 @@ int main(int argc, char *argv[]) {
     // Used to store data from the robot
     RobotState robot_state;
 
-    CommBackend last_backend = backend;
+    // CommBackend last_backend = backend;
+    // URVersion last_ur_version = ur_version;
 
     while (!ui.state.exit_window) {
 
@@ -108,14 +109,21 @@ int main(int argc, char *argv[]) {
         }
 
         CommBackend selected_backend = (ui.state.backend_menu_selected == 0) ? CommBackend::TCPIP : CommBackend::EPICS;
-        if (selected_backend != last_backend) {
+        if (selected_backend != backend) {
+            backend = selected_backend;
             ur_comm->disconnect();
             if (selected_backend == CommBackend::TCPIP) {
                 ur_comm = std::make_unique<URRtdeComm>();
             } else {
                 ur_comm = std::make_unique<UREpicsComm>();
             }
-            last_backend = selected_backend;
+        }
+
+        URVersion selected_ur_version = (ui.state.model_menu_selected == 0) ? URVersion::UR3e : URVersion::UR5e;
+        if (selected_ur_version != ur_version) {
+            ur_version = selected_ur_version;
+            robot_model.unload();
+            robot_model.load(selected_ur_version);
         }
 
         if (ui.state.connect_called) {

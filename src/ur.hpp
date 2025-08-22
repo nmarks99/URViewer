@@ -33,7 +33,7 @@ class UR {
     void draw_axes();
     void draw_axes(int mask);
     void update(const std::vector<float> &joint_angles);
-    void load();
+    void load(URVersion version);
     void unload();
 
   private:

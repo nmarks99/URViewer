@@ -15,6 +15,37 @@ std::filesystem::path get_model_dir(URVersion version) {
     return model_dir;
 }
 
+std::array<Matrix, UR_NUM_MODELS> get_tfs(URVersion version) {
+    std::array<Matrix, UR_NUM_MODELS> tfs;
+    switch (version) {
+    case URVersion::UR3e:
+        tfs = {
+            UR3e::TSBASE,
+            UR3e::TB1,
+            UR3e::T12,
+            UR3e::T23,
+            UR3e::T34,
+            UR3e::T45,
+            UR3e::T56,
+            UR3e::T6TOOL,
+        };
+        break;
+    case URVersion::UR5e:
+        tfs = {
+            UR5e::TSBASE,
+            UR5e::TB1,
+            UR5e::T12,
+            UR5e::T23,
+            UR5e::T34,
+            UR5e::T45,
+            UR5e::T56,
+            UR5e::T6TOOL,
+        };
+        break;
+    }
+    return tfs;
+}
+
 UR::UR(URVersion version) :
     model_dir_(get_model_dir(version)),
     version_(version),
@@ -27,44 +58,37 @@ UR::UR(URVersion version) :
     wrist3_(model_dir_ / "wrist3.obj", UR_MODEL_LABELS.at(6).data()),
     tool_(model_dir_ / "../robotiq-hand-e.obj", UR_MODEL_LABELS.at(7).data())
 {
-    switch (version) {
-    case URVersion::UR3e:
-        tfs_ = {
-            UR3e::TSBASE,
-            UR3e::TB1,
-            UR3e::T12,
-            UR3e::T23,
-            UR3e::T34,
-            UR3e::T45,
-            UR3e::T56,
-            UR3e::T6TOOL,
-        };
-        break;
-    case URVersion::UR5e:
-        tfs_ = {
-            UR5e::TSBASE,
-            UR5e::TB1,
-            UR5e::T12,
-            UR5e::T23,
-            UR5e::T34,
-            UR5e::T45,
-            UR5e::T56,
-            UR5e::T6TOOL,
-        };
-        break;
-    }
+    tfs_ = get_tfs(version);
+    this->load(version);
 }
 
-void UR::load() {
-    this->for_each_model([](RLModel &model){
-        model.load();
-    });
-    loaded_ = true;
+void UR::load(URVersion version) {
+    if (not loaded_) {
+        version_ = version;
+        model_dir_ = get_model_dir(version);
 
-    // apply initial static transform
-    this->at(0).model.transform = tfs_.at(0);
-    for (int i = 1; i < UR_NUM_MODELS; i++) {
-        this->at(i).model.transform = MatrixMultiply(tfs_.at(i), this->at(i-1).model.transform);
+        // update the paths of existing RLModel objects
+        base_.path = (model_dir_ / "base.obj").string();
+        shoulder_.path = (model_dir_ / "shoulder.obj").string();
+        upperarm_.path = (model_dir_ / "upperarm.obj").string();
+        forearm_.path = (model_dir_ / "forearm.obj").string();
+        wrist1_.path = (model_dir_ / "wrist1.obj").string();
+        wrist2_.path = (model_dir_ / "wrist2.obj").string();
+        wrist3_.path = (model_dir_ / "wrist3.obj").string();
+        tool_.path = (model_dir_ / "../robotiq-hand-e.obj").string();
+
+        this->for_each_model([](RLModel &model){
+            model.load();
+        });
+        loaded_ = true;
+
+        tfs_ = get_tfs(version);
+
+        // apply initial static transform
+        this->at(0).model.transform = tfs_.at(0);
+        for (int i = 1; i < UR_NUM_MODELS; i++) {
+            this->at(i).model.transform = MatrixMultiply(tfs_.at(i), this->at(i-1).model.transform);
+        }
     }
 }
 
