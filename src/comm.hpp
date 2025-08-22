@@ -4,7 +4,7 @@
 #include <pva/client.h>
 #include <pv/caProvider.h>
 
-class URRtdeComm : public IURCommunication{
+class URRtdeComm : public URCommBase{
   public:
     URRtdeComm();
     ~URRtdeComm();
@@ -25,7 +25,7 @@ class EPICSConnMon : public pvac::ClientChannel::ConnectCallback {
     bool connected_ = false;
 };
 
-class UREpicsComm : public IURCommunication{
+class UREpicsComm : public URCommBase{
   public:
     UREpicsComm();
     // ~UREpicsComm();

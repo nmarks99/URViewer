@@ -34,7 +34,7 @@ Examples:
   ./URViewer
 )";
 
-std::unique_ptr<IURCommunication> ur_comm;
+std::unique_ptr<URCommBase> ur_comm;
 
 int main(int argc, char *argv[]) {
 
