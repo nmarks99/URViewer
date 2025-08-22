@@ -10,12 +10,17 @@ struct UIState {
     int axes_mask = 0;
     int wires_mask = 0;
 
+    bool backend_menu_active = false;
+    int backend_menu_selected = 0;
+
     std::string connection_string;
-    bool dropdown_active = false;
-    int dropdown_selected = 0;
     bool conn_text_active = false;
+
     bool connect_called = false;
     bool disconnect_called = false;
+
+    bool model_menu_active = false;
+    int model_menu_selected = 0;
 
     bool ask_to_quit = false;
     bool exit_window = false;

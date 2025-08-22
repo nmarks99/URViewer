@@ -3,8 +3,9 @@
 #include "ui.hpp"
 #include "ur.hpp"
 
-constexpr int MENU_WIDTH = 400;
-constexpr int MENU_HEIGHT = 450;
+constexpr int MENU_WIDTH = 430;
+constexpr int MENU_HEIGHT = 490;
+constexpr int DEFAULT_FONT_SIZE = 24;
 
 Ui::Ui(const UIState &ui_state)
     : screen_width_(GetScreenWidth()),
@@ -19,7 +20,9 @@ Ui::Ui(const UIState &ui_state)
     for (int i = 32; i <= 126; ++i) {
         codepoints_vec.push_back(i);
     }
-    codepoints_vec.push_back(0xE33E); // degree symbol
+    codepoints_vec.push_back(0xE33E); // degree
+    codepoints_vec.push_back(0xf467); // X
+    codepoints_vec.push_back(0xf00c); // checkmark
     font_ = LoadFontEx(
         (std::filesystem::path(URVIEWER_RESOURCE_DIR) / "fonts/JetBrainsMonoNerdFont-Regular.ttf").c_str(),
         24,
@@ -27,7 +30,7 @@ Ui::Ui(const UIState &ui_state)
         codepoints_vec.size()
     );
     GuiSetFont(font_);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 24);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, DEFAULT_FONT_SIZE);
 }
 
 Ui::~Ui() {
@@ -55,21 +58,6 @@ void Ui::update(const RobotState &robot_state) {
 
 void Ui::draw() {
 
-    // Ask to quit box
-    if (state.ask_to_quit) {
-        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));
-        int result = GuiMessageBox(
-            (Rectangle){ (float)GetScreenWidth()/2 - 225, (float)GetScreenHeight()/2 - 100, 450, 200 },
-            GuiIconText(ICON_EXIT, "Close Window"),
-            "Do you really want to exit?", "Yes;No");
-        if ((result == 0) || (result == 2)) {
-            state.ask_to_quit = false;
-        } else if (result == 1) {
-            state.exit_window = true;
-        }
-    }
-
-
     // Box to contain all menu elements
     if (state.show_menu) {
         int res = GuiWindowBox(Rectangle{x_, y_, MENU_WIDTH, MENU_HEIGHT}, "Settings");
@@ -83,34 +71,35 @@ void Ui::draw() {
         return;
     }
 
-
-    // ------------------------------------------------------------------
-    // Connection
-    // ------------------------------------------------------------------
-
     // Connection string (IP addr/PV prefix) input box
-    static constexpr float CONN_REC_WIDTH = 250.0;
+    constexpr float CONN_REC_WIDTH = 250.0;
+    // constexpr float WIDGET_X_OFFSET = float(MENU_WIDTH/2.0 - CONN_REC_WIDTH/2.0);
+    constexpr float WIDGET_X_OFFSET = 140;
     if (GuiTextBox(Rectangle{
-        .x = x_+float(MENU_WIDTH/2.0 - CONN_REC_WIDTH/2.0),
-        .y = y_+40,
+        .x = x_+WIDGET_X_OFFSET,
+        .y = y_+100,
         .width = CONN_REC_WIDTH,
         .height = 25
     }, state.connection_string.data(), TEXT_INPUT_SIZE, state.conn_text_active)) {
         state.conn_text_active = !state.conn_text_active;
     }
 
+    // Connect button
     if (GuiButton(Rectangle{
-        .x = x_+float(MENU_WIDTH/2.0 - CONN_REC_WIDTH/2.0),
-        .y = y_+70,
+        .x = x_+WIDGET_X_OFFSET,
+        .y = y_+130,
         .width = CONN_REC_WIDTH/2-5,
         .height = 25
     }, "Connect")) {
-        state.connect_called = true;
+        if (!state.backend_menu_active) {
+            state.connect_called = true;
+        }
     }
 
+    // Disconnect button
     if (GuiButton(Rectangle{
-        .x = x_+float(MENU_WIDTH/2.0+5),
-        .y = y_+70,
+        .x = x_+ WIDGET_X_OFFSET + CONN_REC_WIDTH/2 + 5,
+        .y = y_+130,
         .width = CONN_REC_WIDTH/2-5,
         .height = 25
     }, "Disconnect")) {
@@ -120,30 +109,46 @@ void Ui::draw() {
     std::string connection_status_msg;
     if (connected_) {
         GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(GREEN));
-        connection_status_msg = "  Connected  ";
+        connection_status_msg = "";
     } else {
         GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(RED));
-        connection_status_msg = " Disconnected";
+        connection_status_msg = "";
     }
     GuiLabel(Rectangle {
-        .x = x_+float(MENU_WIDTH/2.0 - CONN_REC_WIDTH/2.0) + 48,
-        .y = y_+100,
-        .width = screen_width_,
-        .height = 30
+        .x = x_ + WIDGET_X_OFFSET + CONN_REC_WIDTH + 3,
+        .y = y_ + 100,
+        .width = 24,
+        .height = 24
     }, connection_status_msg.data());
     GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(BLACK));
 
-    // Dropdown for communciation backend selection
-    constexpr float DROPDOWN_REC_WIDTH = 200.0;
-    if (GuiDropdownBox(Rectangle{20, 20, 200, 30}, "TCP/IP;EPICS", &state.dropdown_selected, state.dropdown_active)) {
-        state.dropdown_active = !state.dropdown_active;
+    GuiLabel(Rectangle{x_ + WIDGET_X_OFFSET - 130, y_+40, 150, 25},      "     Robot: ");
+    GuiLabel(Rectangle{x_ + WIDGET_X_OFFSET - 130, y_+70, 150, 25},      "   Backend: ");
+    if (state.backend_menu_selected == 0) {
+        GuiLabel(Rectangle{x_ + WIDGET_X_OFFSET - 130, y_+100, 150, 25}, "IP address: ");
+    } else {
+        GuiLabel(Rectangle{x_ + WIDGET_X_OFFSET - 130, y_+100, 150, 25}, "IOC prefix: ");
     }
+
+    // Dropdown for communciation backend selection
+    if (GuiDropdownBox(Rectangle{x_ + WIDGET_X_OFFSET, y_+70, 125, 25}, "TCP/IP;EPICS", &state.backend_menu_selected, state.backend_menu_active)) {
+        if (!state.model_menu_active) {
+            state.backend_menu_active = !state.backend_menu_active;
+        }
+    }
+
+    // Dropdown for robot model selection
+    if (GuiDropdownBox(Rectangle{x_ + WIDGET_X_OFFSET, y_+40, 125, 25}, "UR3e;UR5e", &state.model_menu_selected, state.model_menu_active)) {
+        state.model_menu_active = !state.model_menu_active;
+    }
+
+
 
     // ------------------------------------------------------------------
     // Robot data/settings
     // ------------------------------------------------------------------
 
-    static constexpr float s2_y_start = 150;
+    static constexpr float s2_y_start = 175;
     // axes check box labels
     GuiLabel(Rectangle{
         .x = x_+235,
@@ -216,5 +221,21 @@ void Ui::draw() {
             }, "", &checked_wire)) {
             checked_wire ? state.wires_mask |= (1 << row) : state.wires_mask &= ~(1 << row);
         }
+
     }
+
+    // Ask to quit box
+    if (state.ask_to_quit) {
+        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));
+        int result = GuiMessageBox(
+            (Rectangle){ (float)GetScreenWidth()/2 - 225, (float)GetScreenHeight()/2 - 100, 450, 200 },
+            GuiIconText(ICON_EXIT, "Close Window"),
+            "Do you really want to exit?", "Yes;No");
+        if ((result == 0) || (result == 2)) {
+            state.ask_to_quit = false;
+        } else if (result == 1) {
+            state.exit_window = true;
+        }
+    }
+
 }

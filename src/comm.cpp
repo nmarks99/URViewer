@@ -71,12 +71,12 @@ UREpicsComm::UREpicsComm() : connection_monitor_(std::make_unique<EPICSConnMon>(
 }
 
 void UREpicsComm::disconnect() {
-    channel_->removeConnectListener(connection_monitor_.get());
-    provider_->disconnect();
-    channel_ = nullptr;
-    monitor_ = nullptr;
-    connected_ = false;
-    connection_monitor_->connected_ = false;
+    if (connected_) {
+        channel_->removeConnectListener(connection_monitor_.get());
+        provider_->disconnect();
+        connected_ = false;
+        connection_monitor_->connected_ = false;
+    }
 };
 
 bool UREpicsComm::connected() {
@@ -85,14 +85,13 @@ bool UREpicsComm::connected() {
 
 bool UREpicsComm::connect(const std::string &ioc_prefix) {
 
-    if (connected_) {
-        this->disconnect();
+    if (not connected_) {
+        // ioc_prefix might contain trailing '\0' characters so we do this to fix
+        const std::string pv_name = std::string(ioc_prefix.c_str()) + JOINT_ANGLES_PV_NAME;
+        channel_ = std::make_unique<pvac::ClientChannel>(provider_.get()->connect(pv_name));
+        channel_->addConnectListener(connection_monitor_.get());
+        monitor_ = std::make_unique<pvac::MonitorSync>(channel_->monitor());
     }
-    // ioc_prefix might contain trailing '\0' characters so we do this to fix
-    const std::string pv_name = std::string(ioc_prefix.c_str()) + JOINT_ANGLES_PV_NAME;
-    channel_ = std::make_unique<pvac::ClientChannel>(provider_.get()->connect(pv_name));
-    channel_->addConnectListener(connection_monitor_.get());
-    monitor_ = std::make_unique<pvac::MonitorSync>(channel_->monitor());
     return true; // this "connect" never fails, though PV might not be connected
 }
 

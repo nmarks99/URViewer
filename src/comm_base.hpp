@@ -9,7 +9,7 @@ struct RobotState {
 
 enum class CommBackend {
     EPICS,
-    RTDE
+    TCPIP
 };
 
 class IURCommunication {

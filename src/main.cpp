@@ -18,8 +18,8 @@ Usage:
 Options:
   -h, --help          Show this help message and exit
   --model <model>     Robot model to use (UR3, UR5)
-  --backend <backend> Communication backend (EPICS, RTDE)
-  --IP <ip_address>   IP address of the robot controller (if using RTDE backend)
+  --backend <backend> Communication backend (EPICS, TCP)
+  --IP <ip_address>   IP address of the robot controller (if using TCP/IP backend)
   --prefix <prefix>   IOC prefix (if using EPICS backend)
 
 Examples:
@@ -30,7 +30,7 @@ Examples:
   ./URViewer --model UR3 --backend EPICS --prefix 192.168.1.100
 
   # Start URViewer with defaults:
-  # RTDE backend, UR3 model, IP must be entered in GUI
+  # TCP/IP backend, UR3 model, IP must be entered in GUI
   ./URViewer
 )";
 
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
         connection_string = conn_arg_str.size() ? conn_arg_str : "";
 
         const std::string backend_arg_str = args({"--backend"}).str();
-        backend = (backend_arg_str == "EPICS") ? CommBackend::EPICS : CommBackend::RTDE;
+        backend = (backend_arg_str == "EPICS") ? CommBackend::EPICS : CommBackend::TCPIP;
     }
 
     // initialize the window
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
     // Connection to the robot
     if (backend == CommBackend::EPICS) {
         ur_comm = std::make_unique<UREpicsComm>();
-    } else if (backend == CommBackend::RTDE) {
+    } else if (backend == CommBackend::TCPIP) {
         ur_comm = std::make_unique<URRtdeComm>();
     }
 
@@ -107,15 +107,13 @@ int main(int argc, char *argv[]) {
             cam.update();
         }
 
-        CommBackend selected_backend = (ui.state.dropdown_selected == 0) ? CommBackend::RTDE : CommBackend::EPICS;
+        CommBackend selected_backend = (ui.state.backend_menu_selected == 0) ? CommBackend::TCPIP : CommBackend::EPICS;
         if (selected_backend != last_backend) {
             ur_comm->disconnect();
-            if (selected_backend == CommBackend::RTDE) {
-                std::cout << "RTDE backend!" << std::endl;
+            if (selected_backend == CommBackend::TCPIP) {
                 ur_comm = std::make_unique<URRtdeComm>();
             } else {
                 ur_comm = std::make_unique<UREpicsComm>();
-                std::cout << "EPICS backend!" << std::endl;
             }
             last_backend = selected_backend;
         }
