@@ -2,12 +2,12 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-#include "rl_utils.hpp"
-#include "ur.hpp"
-#include "ui.hpp"
-#include "comm_base.hpp"
-#include "comm.hpp"
 #include "argh.h"
+#include "comm.hpp"
+#include "comm_base.hpp"
+#include "rl_utils.hpp"
+#include "ui.hpp"
+#include "ur.hpp"
 
 const std::string CLI_HELP_MESSAGE = R"(
 URViewer - Live 3D viewer for Universal Robots
@@ -86,7 +86,6 @@ int main(int argc, char *argv[]) {
 
     // Load models and apply initial transforms
     UR robot_model(ur_version);
-    // robot_model.load();
 
     // Connection to the robot
     if (backend == CommBackend::EPICS) {
@@ -98,9 +97,6 @@ int main(int argc, char *argv[]) {
     // Used to store data from the robot
     RobotState robot_state;
 
-    // CommBackend last_backend = backend;
-    // URVersion last_ur_version = ur_version;
-
     while (!ui.state.exit_window) {
 
         // UPDATE ///////////////////////////////////////////////
@@ -108,7 +104,8 @@ int main(int argc, char *argv[]) {
             cam.update();
         }
 
-        CommBackend selected_backend = (ui.state.backend_menu_selected == 0) ? CommBackend::TCPIP : CommBackend::EPICS;
+        CommBackend selected_backend =
+            (ui.state.backend_menu_selected == 0) ? CommBackend::TCPIP : CommBackend::EPICS;
         if (selected_backend != backend) {
             backend = selected_backend;
             ur_comm->disconnect();
@@ -119,7 +116,8 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        URVersion selected_ur_version = (ui.state.model_menu_selected == 0) ? URVersion::UR3e : URVersion::UR5e;
+        URVersion selected_ur_version =
+            (ui.state.model_menu_selected == 0) ? URVersion::UR3e : URVersion::UR5e;
         if (selected_ur_version != ur_version) {
             ur_version = selected_ur_version;
             robot_model.unload();
@@ -141,7 +139,6 @@ int main(int argc, char *argv[]) {
 
         ui.update(robot_state);
         // UPDATE ///////////////////////////////////////////////
-
 
         // DRAW /////////////////////////////////////////////////
         BeginDrawing();

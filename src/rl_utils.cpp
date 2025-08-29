@@ -9,8 +9,7 @@ RLModel::RLModel(const char *model_path) : path(model_path) {}
 
 RLModel::RLModel(std::filesystem::path model_path) : path(model_path.string()) {}
 
-RLModel::RLModel(const char *model_path, const std::string &name)
-    : name(name), path(model_path) {}
+RLModel::RLModel(const char *model_path, const std::string &name) : name(name), path(model_path) {}
 
 RLModel::RLModel(std::filesystem::path model_path, const std::string &name)
     : name(name), path(model_path.string()) {}
@@ -21,9 +20,7 @@ RLModel::~RLModel() {
     }
 }
 
-void RLModel::load() {
-    model = LoadModel(path.c_str());
-}
+void RLModel::load() { model = LoadModel(path.c_str()); }
 
 void RLModel::unload() {
     if (IsModelValid(model)) {
@@ -49,7 +46,6 @@ void RLModel::draw_axes() {
     }
 }
 
-
 RLWindow::RLWindow(int width, int height, const char *title) {
     SetTraceLogLevel(LOG_FATAL);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -59,14 +55,13 @@ RLWindow::RLWindow(int width, int height, const char *title) {
 
 RLWindow::~RLWindow() { CloseWindow(); }
 
-
 RLCamera3D::RLCamera3D() {
     camera = {0};
     camera.position = Vector3{-1.0f, 1.0f, -1.25f}; // Camera position
-    camera.target = Vector3{0.0f, 0.25f, 0.0f};  // Camera looking at point
-    camera.up = Vector3{0.0f, 1.0f, 0.0f};       // Camera up vector (rotation towards target)
-    camera.fovy = 45.0f;                         // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;      // Camera mode type
+    camera.target = Vector3{0.0f, 0.25f, 0.0f};     // Camera looking at point
+    camera.up = Vector3{0.0f, 1.0f, 0.0f};          // Camera up vector (rotation towards target)
+    camera.fovy = 45.0f;                            // Camera field-of-view Y
+    camera.projection = CAMERA_PERSPECTIVE;         // Camera mode type
 }
 
 void RLCamera3D::update() {
@@ -85,30 +80,36 @@ void RLCamera3D::update() {
     constexpr bool rotateUp = false;
 
     // Camera speeds based on frame time
-    float cameraMoveSpeed = CAMERA_MOVE_SPEED*GetFrameTime();
-    float cameraRotationSpeed = CAMERA_ROTATION_SPEED*GetFrameTime();
-    float cameraPanSpeed = CAMERA_PAN_SPEED*GetFrameTime();
-    float cameraOrbitalSpeed = CAMERA_ORBITAL_SPEED*GetFrameTime();
+    float cameraMoveSpeed = CAMERA_MOVE_SPEED * GetFrameTime();
+    float cameraRotationSpeed = CAMERA_ROTATION_SPEED * GetFrameTime();
+    float cameraPanSpeed = CAMERA_PAN_SPEED * GetFrameTime();
+    float cameraOrbitalSpeed = CAMERA_ORBITAL_SPEED * GetFrameTime();
 
     // Zoom in on the target with the scroll wheel
-    CameraMoveToTarget(&camera, -GetMouseWheelMove()*CAMERA_ZOOM_FACTOR);
-    if (IsKeyPressed(KEY_KP_SUBTRACT)) CameraMoveToTarget(&camera, 2.0f);
-    if (IsKeyPressed(KEY_KP_ADD)) CameraMoveToTarget(&camera, -2.0f);
+    CameraMoveToTarget(&camera, -GetMouseWheelMove() * CAMERA_ZOOM_FACTOR);
+    if (IsKeyPressed(KEY_KP_SUBTRACT))
+        CameraMoveToTarget(&camera, 2.0f);
+    if (IsKeyPressed(KEY_KP_ADD))
+        CameraMoveToTarget(&camera, -2.0f);
 
     // rotate around the target when clicking the scroll wheel
     if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) {
         Vector2 mousePositionDelta = GetMouseDelta();
-        CameraYaw(&camera, -mousePositionDelta.x*CAMERA_MOUSE_MOVE_SENSITIVITY, rotateAroundTarget);
-        CameraPitch(&camera, -mousePositionDelta.y*CAMERA_MOUSE_MOVE_SENSITIVITY, lockView, rotateAroundTarget, rotateUp);
+        CameraYaw(&camera, -mousePositionDelta.x * CAMERA_MOUSE_MOVE_SENSITIVITY, rotateAroundTarget);
+        CameraPitch(&camera, -mousePositionDelta.y * CAMERA_MOUSE_MOVE_SENSITIVITY, lockView,
+                    rotateAroundTarget, rotateUp);
     }
 
     // move the camera with the W A S D keys
-    if (IsKeyDown(KEY_W)) CameraMoveForward(&camera, cameraMoveSpeed, moveInWorldPlane);
-    if (IsKeyDown(KEY_A)) CameraMoveRight(&camera, -cameraMoveSpeed, moveInWorldPlane);
-    if (IsKeyDown(KEY_S)) CameraMoveForward(&camera, -cameraMoveSpeed, moveInWorldPlane);
-    if (IsKeyDown(KEY_D)) CameraMoveRight(&camera, cameraMoveSpeed, moveInWorldPlane);
+    if (IsKeyDown(KEY_W))
+        CameraMoveForward(&camera, cameraMoveSpeed, moveInWorldPlane);
+    if (IsKeyDown(KEY_A))
+        CameraMoveRight(&camera, -cameraMoveSpeed, moveInWorldPlane);
+    if (IsKeyDown(KEY_S))
+        CameraMoveForward(&camera, -cameraMoveSpeed, moveInWorldPlane);
+    if (IsKeyDown(KEY_D))
+        CameraMoveRight(&camera, cameraMoveSpeed, moveInWorldPlane);
 }
-
 
 void draw_axes_3d(float thickness, Matrix transform) {
     constexpr int sides = 20;

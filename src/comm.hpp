@@ -1,10 +1,10 @@
 #pragma once
 #include "comm_base.hpp"
 #include "ur_rtde/rtde_receive_interface.h"
-#include <pva/client.h>
 #include <pv/caProvider.h>
+#include <pva/client.h>
 
-class URRtdeComm : public URCommBase{
+class URRtdeComm : public URCommBase {
   public:
     URRtdeComm();
     ~URRtdeComm();
@@ -25,7 +25,7 @@ class EPICSConnMon : public pvac::ClientChannel::ConnectCallback {
     bool connected_ = false;
 };
 
-class UREpicsComm : public URCommBase{
+class UREpicsComm : public URCommBase {
   public:
     UREpicsComm();
     // ~UREpicsComm();

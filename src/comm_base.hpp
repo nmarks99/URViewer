@@ -1,16 +1,13 @@
 #pragma once
-#include <vector>
 #include <string>
+#include <vector>
 
 struct RobotState {
     bool connected = false;
     std::vector<float> joint_angles = std::vector<float>(6, 0.0f);
 };
 
-enum class CommBackend {
-    EPICS,
-    TCPIP
-};
+enum class CommBackend { EPICS, TCPIP };
 
 class URCommBase {
   public:

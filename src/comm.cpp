@@ -1,7 +1,6 @@
 #include "comm.hpp"
 
-URRtdeComm::URRtdeComm() : recv_(nullptr) {
-}
+URRtdeComm::URRtdeComm() : recv_(nullptr) {}
 
 URRtdeComm::~URRtdeComm() {
     if (recv_) {
@@ -60,7 +59,6 @@ RobotState URRtdeComm::get_robot_state() {
     };
 }
 
-
 inline const std::string JOINT_ANGLES_PV_NAME = "Receive:ActualJointPositions";
 
 void EPICSConnMon::connectEvent(const pvac::ConnectEvent &event) { connected_ = event.connected; }
@@ -79,9 +77,7 @@ void UREpicsComm::disconnect() {
     }
 };
 
-bool UREpicsComm::connected() {
-    return this->connection_monitor_->connected_;
-};
+bool UREpicsComm::connected() { return this->connection_monitor_->connected_; };
 
 bool UREpicsComm::connect(const std::string &ioc_prefix) {
 
@@ -100,7 +96,7 @@ RobotState UREpicsComm::get_robot_state() {
 
     connected_ = this->connected();
     if (not connected_ or not channel_ or not monitor_) {
-        return RobotState {
+        return RobotState{
             .connected = false,
         };
     }
@@ -108,30 +104,27 @@ RobotState UREpicsComm::get_robot_state() {
     // MonitorSync::test() is non-blocking as opposed to ClientChannel::get()
     if (monitor_->test()) {
         switch (monitor_->event.event) {
-            case pvac::MonitorEvent::Data:
-                while (monitor_->poll()) {
-                    auto pfield = monitor_->root.get();
-                    pvd::shared_vector<const double> q_shared = pfield->getSubFieldT<pvd::PVDoubleArray>("value")->view();
-                    std::copy(q_shared.begin(), q_shared.end(), last_angles_.begin());
-                    for (auto &v : last_angles_) {
-                        v = v * (M_PI/180.0); // convert degrees to radians
-                    }
+        case pvac::MonitorEvent::Data:
+            while (monitor_->poll()) {
+                auto pfield = monitor_->root.get();
+                pvd::shared_vector<const double> q_shared =
+                    pfield->getSubFieldT<pvd::PVDoubleArray>("value")->view();
+                std::copy(q_shared.begin(), q_shared.end(), last_angles_.begin());
+                for (auto &v : last_angles_) {
+                    v = v * (M_PI / 180.0); // convert degrees to radians
                 }
-                break;
-            case pvac::MonitorEvent::Disconnect:
-                connected_ = false;
-                break;
-            case pvac::MonitorEvent::Fail:
-                connected_ = false;
-                break;
-            case pvac::MonitorEvent::Cancel:
-                connected_ = false;
-                break;
+            }
+            break;
+        case pvac::MonitorEvent::Disconnect:
+            connected_ = false;
+            break;
+        case pvac::MonitorEvent::Fail:
+            connected_ = false;
+            break;
+        case pvac::MonitorEvent::Cancel:
+            connected_ = false;
+            break;
         }
     }
-    return RobotState {
-        .connected = true,
-        .joint_angles = last_angles_
-    };
+    return RobotState{.connected = true, .joint_angles = last_angles_};
 }
-

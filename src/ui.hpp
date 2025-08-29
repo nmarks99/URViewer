@@ -1,7 +1,7 @@
 #pragma once
-#include <vector>
-#include "raylib.h"
 #include "comm_base.hpp"
+#include "raylib.h"
+#include <vector>
 
 constexpr int TEXT_INPUT_SIZE = 128;
 
@@ -27,9 +27,7 @@ struct UIState {
 
     bool show_menu = true;
 
-    UIState() {
-        connection_string.resize(TEXT_INPUT_SIZE, '\0');
-    }
+    UIState() { connection_string.resize(TEXT_INPUT_SIZE, '\0'); }
 };
 
 class Ui {
