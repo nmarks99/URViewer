@@ -47,9 +47,10 @@ if (FETCH_UR_RTDE)
     message(STATUS "Cloning ur_rtde using FetchContent.")
     set(EXAMPLES OFF CACHE BOOL "" FORCE)
     set(PYTHON_BINDINGS OFF CACHE BOOL "" FORCE)
+    set(BUILD_STATIC ON CACHE BOOL "" FORCE)
     FetchContent_Declare(ur_rtde
         GIT_REPOSITORY https://gitlab.com/sdurobotics/ur_rtde.git
-        GIT_TAG         v1.6.0
+	GIT_TAG         v1.6.0
         GIT_SHALLOW     TRUE
         GIT_PROGRESS    TRUE
         GIT_SUBMODULES  ""
@@ -118,9 +119,9 @@ set(EPICS_BASE_INCLUDES
 )
 # ------------------------------------------------------------------------------
 
-
 # Define a preprocessor macro for the resources directory
-add_compile_definitions(URVIEWER_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources")
+# add_compile_definitions(URVIEWER_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources")
+add_compile_definitions(URVIEWER_RESOURCE_DIR="${CMAKE_INSTALL_PREFIX}/share/URViewer/resources")
 
 #####################################################
 add_executable(URViewer
@@ -141,4 +142,20 @@ target_link_libraries(URViewer
     PRIVATE raylib
     PRIVATE ur_rtde::rtde
     PRIVATE ${EPICS_BASE_LIBRARIES}
+)
+#####################################################
+
+set_target_properties(URViewer PROPERTIES
+    INSTALL_RPATH "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}"
+    BUILD_WITH_INSTALL_RPATH FALSE
+)
+
+# Install the binary into ${CMAKE_INSTALL_PREFIX}/bin
+install(TARGETS URViewer
+    RUNTIME DESTINATION bin
+)
+
+# Install resources into ${CMAKE_INSTALL_PREFIX}/share/URViewer/resources
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources
+    DESTINATION share/URViewer
 )
