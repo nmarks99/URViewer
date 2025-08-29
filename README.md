@@ -13,5 +13,7 @@ A no frills 3D viewer for Universal Robots based on [raylib](https://github.com/
 
 For now, no compiled binaries are provided for URViewer so you must build it from source.
 It has only been tested on Linux, though compiling for other operating systems should be possible.
-After installing the required dependencies, use cmake to build the URViewer application. Depending on
-where you installed the dependencies, you may need to set `-Dur_rtde_DIR` and `-Draylib_DIR` when running cmake.
+
+EPICS base and boost must be installed on your system. raylib and ur_rtde can be
+cloned and built with the project using FetchContent by setting `-DFETCH_UR_RTDE=ON` and `-DFETCH_RAYLIB=ON` (default).
+If you have installed these dependencies yourself, set those flags to OFF and you may need to set `-Dur_rtde_DIR` and `-Draylib_DIR`.
