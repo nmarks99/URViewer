@@ -50,8 +50,7 @@ if (FETCH_UR_RTDE)
     set(BUILD_STATIC ON CACHE BOOL "" FORCE)
     FetchContent_Declare(ur_rtde
         GIT_REPOSITORY https://gitlab.com/sdurobotics/ur_rtde.git
-        # GIT_TAG         v1.6.0
-        GIT_BRANCH      master
+	GIT_TAG         v1.6.0
         GIT_SHALLOW     TRUE
         GIT_PROGRESS    TRUE
         GIT_SUBMODULES  ""
