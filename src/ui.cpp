@@ -16,12 +16,11 @@ Ui::Ui(const UIState &ui_state)
     for (int i = 32; i <= 126; ++i) {
         codepoints_vec.push_back(i);
     }
-    codepoints_vec.push_back(0xE33E); // degree
-    codepoints_vec.push_back(0xf467); // X
-    codepoints_vec.push_back(0xf00c); // checkmark
-    font_ = LoadFontEx(
-        (std::filesystem::path(URVIEWER_RESOURCE_DIR) / "fonts/JetBrainsMonoNerdFont-Regular.ttf").c_str(),
-        24, codepoints_vec.data(), codepoints_vec.size());
+    codepoints_vec.push_back(0xE33E);  // degree
+    codepoints_vec.push_back(0xf467);  // X
+    codepoints_vec.push_back(0xf00c);  // checkmark
+    font_ = LoadFontEx((get_resource_dir() / "fonts/JetBrainsMonoNerdFont-Regular.ttf").c_str(), 24,
+                       codepoints_vec.data(), codepoints_vec.size());
     GuiSetFont(font_);
     GuiSetStyle(DEFAULT, TEXT_SIZE, DEFAULT_FONT_SIZE);
 }
@@ -51,6 +50,20 @@ void Ui::update(const RobotState &robot_state) {
 
 void Ui::draw() {
 
+    auto draw_ask_to_quit = [&]() {
+	if (state.ask_to_quit) {
+	    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));
+	    int result = GuiMessageBox(
+		(Rectangle){(float)GetScreenWidth() / 2 - 225, (float)GetScreenHeight() / 2 - 100, 450, 200},
+		GuiIconText(ICON_EXIT, "Close Window"), "Do you really want to exit?", "Yes;No");
+	    if ((result == 0) || (result == 2)) {
+		state.ask_to_quit = false;
+	    } else if (result == 1) {
+		state.exit_window = true;
+	    }
+	}
+    };
+
     // Box to contain all menu elements
     if (state.show_menu) {
         int res = GuiWindowBox(Rectangle{x_, y_, MENU_WIDTH, MENU_HEIGHT}, "Settings");
@@ -58,15 +71,15 @@ void Ui::draw() {
             state.show_menu = false;
         }
     } else {
-        if (GuiButton((Rectangle){screen_width_ - 135, 10, 125, 30}, GuiIconText(ICON_GEAR, "Settings"))) {
-            state.show_menu = true;
-        }
+	if (GuiButton((Rectangle){screen_width_ - 35, 5, 30, 30}, GuiIconText(ICON_GEAR,""))) {
+	    state.show_menu = true;
+	}
+	draw_ask_to_quit();
         return;
     }
 
     // Connection string (IP addr/PV prefix) input box
     constexpr float CONN_REC_WIDTH = 250.0;
-    // constexpr float WIDGET_X_OFFSET = float(MENU_WIDTH/2.0 - CONN_REC_WIDTH/2.0);
     constexpr float WIDGET_X_OFFSET = 140;
     if (GuiTextBox(Rectangle{.x = x_ + WIDGET_X_OFFSET, .y = y_ + 100, .width = CONN_REC_WIDTH, .height = 25},
                    state.connection_string.data(), TEXT_INPUT_SIZE, state.conn_text_active)) {
@@ -209,16 +222,5 @@ void Ui::draw() {
         }
     }
 
-    // Ask to quit box
-    if (state.ask_to_quit) {
-        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));
-        int result = GuiMessageBox(
-            (Rectangle){(float)GetScreenWidth() / 2 - 225, (float)GetScreenHeight() / 2 - 100, 450, 200},
-            GuiIconText(ICON_EXIT, "Close Window"), "Do you really want to exit?", "Yes;No");
-        if ((result == 0) || (result == 2)) {
-            state.ask_to_quit = false;
-        } else if (result == 1) {
-            state.exit_window = true;
-        }
-    }
+    draw_ask_to_quit();
 }
