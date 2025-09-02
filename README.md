@@ -28,6 +28,8 @@ mkdir build && cd build
 # ~/.local is a good choice
 cmake .. -DCMAKE_INSTALL_PREFIX=~/.local
 
-# Compile and install
-make install
+# Compile...
+make
+# ...and optionally install
+# make install
 ```
