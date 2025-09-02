@@ -50,17 +50,19 @@ void Ui::update(const RobotState &robot_state) {
 
 void Ui::draw() {
 
-    if (state.ask_to_quit) {
-	DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));
-	int result = GuiMessageBox(
-	    (Rectangle){(float)GetScreenWidth() / 2 - 225, (float)GetScreenHeight() / 2 - 100, 450, 200},
-	    GuiIconText(ICON_EXIT, "Close Window"), "Do you really want to exit?", "Yes;No");
-	if ((result == 0) || (result == 2)) {
-	    state.ask_to_quit = false;
-	} else if (result == 1) {
-	    state.exit_window = true;
+    auto draw_ask_to_quit = [&]() {
+	if (state.ask_to_quit) {
+	    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(RAYWHITE, 0.8f));
+	    int result = GuiMessageBox(
+		(Rectangle){(float)GetScreenWidth() / 2 - 225, (float)GetScreenHeight() / 2 - 100, 450, 200},
+		GuiIconText(ICON_EXIT, "Close Window"), "Do you really want to exit?", "Yes;No");
+	    if ((result == 0) || (result == 2)) {
+		state.ask_to_quit = false;
+	    } else if (result == 1) {
+		state.exit_window = true;
+	    }
 	}
-    }
+    };
 
     // Box to contain all menu elements
     if (state.show_menu) {
@@ -72,6 +74,7 @@ void Ui::draw() {
 	if (GuiButton((Rectangle){screen_width_ - 35, 5, 30, 30}, GuiIconText(ICON_GEAR,""))) {
 	    state.show_menu = true;
 	}
+	draw_ask_to_quit();
         return;
     }
 
@@ -218,4 +221,6 @@ void Ui::draw() {
             checked_wire ? state.wires_mask |= (1 << row) : state.wires_mask &= ~(1 << row);
         }
     }
+
+    draw_ask_to_quit();
 }
