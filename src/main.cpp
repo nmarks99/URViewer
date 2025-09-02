@@ -74,7 +74,8 @@ int main(int argc, char *argv[]) {
     }
 
     // initialize the window
-    RLWindow window(1400, 950, "UR Robot Viewer");
+    // RLWindow window(1400, 950, "UR Robot Viewer");
+    RLWindow window(1120, 760, "UR Robot Viewer");
 
     // Set up 3D camera
     RLCamera3D cam;

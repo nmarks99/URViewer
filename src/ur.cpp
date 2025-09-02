@@ -1,15 +1,13 @@
 #include "ur.hpp"
 
-std::filesystem::path get_model_dir(URVersion version) {
-    // cmake defines the URVIEWER_MODEL_DIR macro
-    std::filesystem::path model_dir = URVIEWER_RESOURCE_DIR;
-
+inline std::filesystem::path get_model_dir(URVersion version) {
+    auto model_dir = get_resource_dir();
     switch (version) {
     case URVersion::UR3e:
-        model_dir = model_dir / "UR3e";
+        model_dir /= "UR3e";
         break;
     case URVersion::UR5e:
-        model_dir = model_dir / "UR5e";
+        model_dir /= "UR5e";
         break;
     }
     return model_dir;

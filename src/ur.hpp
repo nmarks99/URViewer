@@ -6,6 +6,13 @@
 #include "rl_utils.hpp"
 #include "raymath.h"
 
+inline std::filesystem::path get_resource_dir() {
+    if (const char* env = std::getenv("URVIEWER_RESOURCE_DIR")) {
+        return std::filesystem::path(env);
+    }
+    return URVIEWER_RESOURCE_DIR;
+}
+
 constexpr int UR_NUM_AXES = 6;
 constexpr int UR_NUM_MODELS = UR_NUM_AXES + 2; // 6 axes/links plus base and tool
 
