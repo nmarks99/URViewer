@@ -15,11 +15,9 @@ option(FETCH_RAYLIB "Fetch raylib using FetchContent" ON)
 option(FETCH_UR_RTDE "Fetch ur_rtde using FetchContent" ON)
 
 # FetchContent for getting dependencies
-if (FETCH_RAYLIB OR FETCH_UR_RTDE)
-    include(FetchContent)
-    set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
-    set(FETCHCONTENT_QUIET OFF)
-endif()
+include(FetchContent)
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+set(FETCHCONTENT_QUIET OFF)
 
 # Clone raylib from GitHub, or find it on the system
 if (FETCH_RAYLIB)
@@ -67,6 +65,15 @@ else()
     endif()
 endif()
 
+# Fetch pace
+message(STATUS "Cloning pace using FetchContent.")
+FetchContent_Declare(pace
+    GIT_REPOSITORY https://github.com/nmarks99/pace.git
+    GIT_TAG        master
+    GIT_SHALLOW    FALSE
+)
+FetchContent_MakeAvailable(pace)
+
 # --- EPICS Base ---------------------------------------------------------------
 # Get path to EPICS base from environment variable or -DEPICS_BASE
 if(NOT DEFINED EPICS_BASE OR EPICS_BASE STREQUAL "")
@@ -90,23 +97,14 @@ if (NOT EPICS_HOST_ARCH)
 endif()
 message(STATUS "EPICS_HOST_ARCH: ${EPICS_HOST_ARCH}")
 
-link_directories(${EPICS_BASE}/lib/${EPICS_HOST_ARCH})
-
-if(APPLE)
-    set(EPICS_LIB_EXT ".dylib")
-elseif(UNIX)
-    set(EPICS_LIB_EXT ".so")
-else()
-    set(EPICS_LIB_EXT ".a")
-endif()
-
-set(EPICS_BASE_LIBRARIES
-    "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}/libpvAccessCA${EPICS_LIB_EXT}"
-    "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}/libca${EPICS_LIB_EXT}"
-    "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}/libpvAccess${EPICS_LIB_EXT}"
-    "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}/libpvData${EPICS_LIB_EXT}"
-    "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}/libCom${EPICS_LIB_EXT}"
-)
+set(EPICS_LIB_DIR "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}")
+foreach(LIB ca Com)
+    find_library(EPICS_${LIB} ${LIB}
+        PATHS ${EPICS_LIB_DIR}
+        NO_DEFAULT_PATH
+        REQUIRED
+    )
+endforeach()
 
 set(EPICS_BASE_INCLUDES
     ${EPICS_BASE}/include
@@ -117,6 +115,27 @@ set(EPICS_BASE_INCLUDES
     ${EPICS_BASE}/include/os/Linux
     ${EPICS_BASE}/include/os/Darwin
 )
+
+# --- PVXS ---------------------------------------------------------------------
+if(NOT DEFINED PVXS OR PVXS STREQUAL "")
+    set(PVXS $ENV{PVXS})
+endif()
+if(NOT PVXS OR PVXS STREQUAL "")
+    message(FATAL_ERROR "PVXS not set. Pass -DPVXS=... or set the PVXS environment variable.")
+endif()
+if(NOT IS_DIRECTORY "${PVXS}")
+    message(FATAL_ERROR "Specified PVXS does not exist: ${PVXS}")
+endif()
+set(PVXS "${PVXS}" CACHE PATH "Path to PVXS")
+message(STATUS "Found PVXS: ${PVXS}")
+
+set(PVXS_LIB_DIR "${PVXS}/lib/${EPICS_HOST_ARCH}")
+find_library(PVXS_LIBRARY pvxs
+    PATHS ${PVXS_LIB_DIR}
+    NO_DEFAULT_PATH
+    REQUIRED
+)
+set(PVXS_INCLUDES "${PVXS}/include")
 # ------------------------------------------------------------------------------
 
 # Define a preprocessor macro for the resources directory
@@ -136,17 +155,21 @@ target_include_directories(URViewer
     PRIVATE src
     PRIVATE external
     PRIVATE ${EPICS_BASE_INCLUDES}
+    PRIVATE ${PVXS_INCLUDES}
 )
 
 target_link_libraries(URViewer
     PRIVATE raylib
     PRIVATE ur_rtde::rtde
-    PRIVATE ${EPICS_BASE_LIBRARIES}
+    PRIVATE pace::pace
+    PRIVATE ${EPICS_ca}
+    PRIVATE ${EPICS_Com}
+    PRIVATE ${PVXS_LIBRARY}
 )
 #####################################################
 
 set_target_properties(URViewer PROPERTIES
-    INSTALL_RPATH "${EPICS_BASE}/lib/${EPICS_HOST_ARCH}"
+    INSTALL_RPATH "${EPICS_LIB_DIR};${PVXS_LIB_DIR}"
     BUILD_WITH_INSTALL_RPATH FALSE
 )
 

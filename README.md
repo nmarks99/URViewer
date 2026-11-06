@@ -9,11 +9,16 @@ A no frills 3D viewer for Universal Robots based on [raylib](https://github.com/
 - [raylib](https://github.com/raysan5/raylib)
 - [ur_rtde](https://gitlab.com/sdurobotics/ur_rtde)
 - [EPICS Base](https://docs.epics-controls.org/en/latest/getting-started/installation.html)
+- [PVXS](https://github.com/epics-base/pvxs)
 - [Boost](https://www.boost.org/) (required by ur_rtde)
 
-EPICS base and boost must be installed on your system. raylib and ur_rtde can be
-cloned and built with the project using FetchContent by setting `-DFETCH_UR_RTDE=ON` and `-DFETCH_RAYLIB=ON` (default).
-If you have installed these dependencies yourself, set those flags to OFF and you may need to set `-Dur_rtde_DIR` and `-Draylib_DIR`.
+EPICS Base, PVXS, and Boost must be installed on your system. Set `EPICS_BASE`,
+`EPICS_HOST_ARCH`, and `PVXS` in the environment or pass `-DEPICS_BASE=...`,
+`-DEPICS_HOST_ARCH=...`, and `-DPVXS=...` to CMake.
+
+PACE is included with FetchContent. Raylib and ur_rtde are also cloned and built
+with FetchContent by default. To use installed raylib or ur_rtde packages instead,
+disable `FETCH_RAYLIB` or `FETCH_UR_RTDE` and provide its CMake package location.
 
 ## Building from Source
 
@@ -26,7 +31,9 @@ mkdir build && cd build
 
 # Configure with cmake. If you don't have sudo, set the install prefix
 # ~/.local is a good choice
-cmake .. -DCMAKE_INSTALL_PREFIX=~/.local
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=~/.local \
+    -DPVXS=~/.local/epics/pvxs
 
 # Compile...
 make
